@@ -1,0 +1,9 @@
+{
+  "game": {"id": 1, "durationMS": 180000, "elapsedMS": 130765},
+  "screen": {"width": 800, "height": 600, "frameRate": 10},
+  "players": [ {"id": 1, "name": "surya", "x": 120, "y": 185, "radius": 40, "mass": 40, 
+               "state": "cooperate", "effect": "none","color": "#ff0000"},
+               {"id": 2, "name": "jon", "x": 402, "y": 300, "radius": 15, "mass": 15, 
+                "state": "defect", "effect": "point", "color": "#00ff00"} ],
+  "orbs": [ {"id": 42, "x": 88, "y": 690} ]
+}

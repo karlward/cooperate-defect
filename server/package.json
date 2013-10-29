@@ -1,0 +1,10 @@
+{
+  "name": "cooperate-defect-server",
+  "version": "0.0.1",
+  "author": "Karl Ward <karl.ward@nyu.edu>",
+  "description": "Cooperate/Defect network game server",
+  "dependencies": {
+    "socket.io": "*",
+    "express": "3.x"
+  }
+}
