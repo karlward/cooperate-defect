@@ -7,6 +7,7 @@
 
   <script type="text/javascript">
     var cd = new Object(); // for cooperate-defect package globals
+    cd.playerId = 0; // FIXME: lookup instead of hardcoding
     
     // when DOM is ready, pull in state from game server, call initScreen
     $(document).ready(function() {
@@ -22,35 +23,30 @@
       
       // capture controller keys
       $('input#controller').keydown(function(e) {
-        console.log('checkKey fired');
-        e = e || window.event;
-        var move = null;
-        if (e.keyCode == '38') { // up arrow
-          move = 'up';
-        }
-        else if (e.keyCode == '40') { // down arrow
-          move = 'down';
-        }
-        else if (e.keyCode == '37') { // left arrow
-          move = 'left';
-        }
-        else if (e.keyCode == '39') { // right arrow
-          move = 'right';
-        }
-        if (!!move) {
+        e = e || window.event; // shim
+        //console.log('checkKey fired for ' + e.keyCode);
+        var data = new Object();
+        var controlKeys = {38: "up", 40: "down", 37: "left", 39: "right", 67: "cooperate", 68: "defect"};
+        if (!!controlKeys[e.keyCode]) {
+          if (controlKeys[e.keyCode].match(/cooperate|defect/)) {
+            data.state = controlKeys[e.keyCode];
+          }
+          else {
+            data.move = controlKeys[e.keyCode];
+          }
           $.ajax({
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
             },
-            url: 'http://localhost:8000/players/0',
+            url: 'http://localhost:8000/players/' + cd.playerId,
             type: 'PATCH',
-            data: JSON.stringify({"move": move}),
+            data: JSON.stringify(data),
             success: function() {
               //console.log("PATCH succeeded for up movement");
             },
             error: function() {
-              //console.log("PATCH failed for up movement");
+              console.log("PATCH failed for up movement");
             }
           });
         }
