@@ -74,7 +74,9 @@ app.get('/orbs/:id', function (req, res) {
     res.end(body);
   }
   else {
-    // FIXME: error handling
+    //console.log('req for non-existent player id');
+    res.statusCode = 400;
+    res.end();
   }
 });
 
@@ -86,7 +88,8 @@ app.get('/orbs\/?$', function (req, res) {
     res.end(body);
   }
   else {
-    // FIXME: error handling
+    res.statusCode = 400;
+    res.end();
   }
 });
 
@@ -98,7 +101,8 @@ app.get('/players/:id', function(req, res) {
     res.end(body);
   }
   else {
-    // FIXME: error handling
+    res.statusCode = 400;
+    res.end();
   }
 });
 
@@ -116,6 +120,7 @@ app.patch('/players/:id', function(req, res) {
   if (!!cd.data.players[req.params.id]) {
     //console.dir(req.body);
     if (!!(req.body.state) && ((req.body.state == 'cooperate') || (req.body.state == 'defect'))) {
+      //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
       cd.data.players[req.params.id].state = req.body.state;
     }
     else {
@@ -130,7 +135,6 @@ app.patch('/players/:id', function(req, res) {
         else {
           cd.data.players[req.params.id].y = 0;
         }
-        res.set('Status-Code', 200);
       }
       else if (req.body.move == 'down') {
         if (cd.data.players[req.params.id].y < cd.data.screen.height) {
@@ -139,7 +143,6 @@ app.patch('/players/:id', function(req, res) {
         else {
           cd.data.players[req.params.id].y = cd.data.screen.height;
         }
-        res.set('Status-Code', 200);
       }
       else if (req.body.move == 'left') {
         if (cd.data.players[req.params.id].x > 0) {
@@ -148,7 +151,6 @@ app.patch('/players/:id', function(req, res) {
         else {
           cd.data.players[req.params.id].x = 0;
         }
-        res.set('Status-Code', 200);
       }
       else if (req.body.move == 'right') {
         if (cd.data.players[req.params.id].x < cd.data.screen.height) {
@@ -157,15 +159,14 @@ app.patch('/players/:id', function(req, res) {
         else {
           cd.data.players[req.params.id].x = cd.data.screen.width;
         }
-        res.set('Status-Code', 200);
       }
       else {
-        res.set('Status-Code', 400);
+        res.statusCode = 400;
       }
     } 
   }
   else {
-    // FIXME: error handling
+    res.statusCode = 400;
   }
   res.end();
 });
@@ -177,12 +178,16 @@ app.get('/', function (req, res) {
 
 app.get('/games/:id', function(req, res) {
   //console.log('request for /games/' + req.params.id);
-  //cd.data.players[0].x = Math.floor(Math.random() * cd.data.screen.width); // make Surya wiggle
-  var body = JSON.stringify(cd.data); // FIXME: multiple games?
-  res.set('Content-Type', 'application/json');
-  res.set('Content-Length', body.length);
-  res.end(body);
-  // FIXME: error handling
+  if (cd.data.game.id == req.params.id) { // FIXME: hardcoded single game id
+    var body = JSON.stringify(cd.data); // FIXME: multiple games?
+    res.set('Content-Type', 'application/json');
+    res.set('Content-Length', body.length);
+    res.end(body);
+  }
+  else {
+    res.statusCode = 400;
+  }
+  res.end();
 });
 
 // FIXME: /games should return a list of games
