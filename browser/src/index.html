@@ -8,6 +8,7 @@
   <script type="text/javascript">
     var cd = new Object(); // for cooperate-defect package globals
     cd.playerId = 0; // FIXME: lookup instead of hardcoding
+    cd.gameId = 1; // FIXME: lookup instead of hardcoding
     
     // when DOM is ready, pull in state from game server, call initScreen
     $(document).ready(function() {
@@ -74,7 +75,7 @@
     // get fresh state from game server
     var getGameData = function() {
       //console.log('in getGameData()');
-      d3.json('http://localhost:8000/games/16', function(err, json) {
+      d3.json('http://localhost:8000/games/' + cd.gameId, function(err, json) {
         if (err) {
           return console.warn(err);
         }
