@@ -10,6 +10,12 @@ app.use(express.bodyParser());
 server.listen(8000);
 
 var cd = new Object(); // for cooperate-defect package globals
+
+// set some defaults
+cd.defaultRadius = 10;
+cd.defaultMass = 10;
+
+// FIXME: for now, load a game in code
 cd.data = 
 {
     "game": {
@@ -119,12 +125,15 @@ app.patch('/players/:id', function(req, res) {
   //console.log('in patch for player ' + req.params.id);
   if (!!cd.data.players[req.params.id]) {
     //console.dir(req.body);
-    if (!!(req.body.state) && ((req.body.state == 'cooperate') || (req.body.state == 'defect'))) {
-      //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
-      cd.data.players[req.params.id].state = req.body.state;
-    }
-    else {
-      // FIXME: error handling
+    if (!!req.body.state) {
+      if ((req.body.state == 'cooperate') || (req.body.state == 'defect')) {
+        //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
+        cd.data.players[req.params.id].state = req.body.state;
+      }
+      else {
+        //console.log('state change specified but it is not cooperate or defect: ' + req.body.state);
+        res.statusCode = 400;
+      }
     }
     if (!!req.body.move) {
       if (req.body.move == 'up') {
@@ -161,13 +170,47 @@ app.patch('/players/:id', function(req, res) {
         }
       }
       else {
+        console.log('unknown move direction');
         res.statusCode = 400;
       }
     } 
   }
   else {
+    console.log('not a move or a state change');
     res.statusCode = 400;
   }
+  res.end();
+});
+
+// return a random color, as an RGB hex string
+var randomRGB = function() {
+  var color = '#';
+  for (var i = 0; i < 3; i++) {
+    var component = (Math.floor(Math.random() * 255)).toString(16);
+    if (component.toString().length < 2) {
+      component = '0' + component.toString();
+    }
+    color = color + component;
+  }
+  return color;
+};
+
+// create a new player
+app.post('/players\/?$', function(req, res) {
+  //console.log('in post for new player);
+  var newPlayer = {
+        "id": cd.data.players.length,
+        "name": null, // FIXME: implement
+        "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
+        "y": Math.floor(Math.random() * cd.data.screen.height),
+        "radius": cd.defaultRadius,
+        "mass": cd.defaultMass,
+        "state": cd.defaultState,
+        "effect": "new",
+        "color": randomRGB(),
+  };
+  cd.data.players.push(newPlayer);
+  body = JSON.stringify(cd.data.players[newPlayer.id]);
   res.end();
 });
 
