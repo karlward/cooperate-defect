@@ -26,7 +26,7 @@ cd.data =
   "screen": {
       "width": 800,
       "height": 600,
-      "frameRate": 10
+      "frameRate": 20
   },
   "players": [
       {
@@ -67,7 +67,7 @@ cd.data =
       {
           "id": 0,
           "x": 88,
-          "y": 690
+          "y": 390
       }
   ]
 };
