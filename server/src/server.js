@@ -66,11 +66,13 @@ cd.data =
   }
   ],
   "orbs": [
+
     {
       "id": 0,
       "x": 88,
       "y": 690
     }
+
   ],
   "links": [
     {     
@@ -99,8 +101,20 @@ cd.data =
       },
       "value" : 1
     }
-  ],
+  ]
 };
+
+app.get('/orbs/:id', function (req, res) {
+  if (!!(cd.data.orbs[req.params.id])) {
+    var body = JSON.stringify(cd.data.orbs[req.params.id]);
+    res.set('Content-Type', 'application/json');
+    res.set('Content-Length', body.length);
+    res.end(body);
+
+  }
+}
+
+  
 
 app.get('/orbs/:id', function (req, res) {
   if (!!(cd.data.orbs[req.params.id])) {
