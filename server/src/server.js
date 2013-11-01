@@ -112,7 +112,7 @@ app.get('/orbs/:id', function (req, res) {
     res.end(body);
 
   }
-}
+});
 
   
 
