@@ -125,6 +125,22 @@
           return d.color;
         })
         .attr('stroke', 'black');
+ 
+      // store d3 elements for players in a convenient variable
+      cd.d3orbs = cd.svg.selectAll('circle.orb')
+        .data(cd.data.orbs)
+        .enter()
+        .append('circle')
+        .attr('class', 'orb')
+          .attr('cx', function(d) {
+          return d.x;
+        })
+        .attr('cy', function(d) {
+          return d.y;
+        })
+        .attr('r', 5)
+        .attr('fill', randomRGB());
+//        .attr('stroke', 'black');
       
 
       cd.d3link = cd.svg.selectAll("line.link")
@@ -159,7 +175,6 @@
           return console.warn(err);
         }
         cd.data = json;
-        //cd.d3players.data(cd.data.players); // FIXME: this is a confusing inversion of players.data() and data.players
       });
     };
     
@@ -210,6 +225,7 @@
         .style("fill-opacity", 1e-6)
         .remove();
       cd.d3players.transition() // move any players that have moved in the data
+//        .duration(100/cd.data.screen.frameRate)
         .attr('cx', function(d) {
           return d.x;
         })
@@ -223,8 +239,58 @@
           return d.color;
         })
         .attr('stroke', 'black');
+      
+      // same thing, but for orbs
+      cd.d3orbs = cd.svg.selectAll("circle.orb").data(cd.data.orbs);
+      cd.d3orbs
+        .enter() // add any new orbs that have appeared in the data
+        .append('circle')
+        .attr('class', 'orb')
+        .attr('cx', function(d) {
+          return d.x;
+        })
+        .attr('cy', function(d) {
+            return d.y;
+        })
+        .attr('r', 5)
+        .attr('fill', randomRGB());
+//        .attr('stroke', 'black');
+      cd.d3orbs // remove any orbs that don't exist in the data anymore
+        .exit()
+        .transition() // we're going to fade them out
+        .duration(200)
+        .attr('fill', '#ffffff')
+        .attr('r', 200)
+        .style("fill-opacity", 1e-6)
+        .remove();
+      cd.d3orbs.transition() // move any orbs that have moved in the data
+        .duration(100/cd.data.screen.frameRate)
+        .attr('cx', function(d) {
+          return d.x;
+        })
+        .attr('cy', function(d) {
+            return d.y;
+        })
+        .attr('r', function(d) {
+          return (Math.floor(Math.random() * 10)); // radius changes at random
+        })
+        .attr('fill', randomRGB()); // color changes at random
+//        .attr('stroke', 'black');
+      
     };
 
+    // return a random color, as an RGB hex string
+    var randomRGB = function() {
+      var color = '#';
+      for (var i = 0; i < 3; i++) {
+        var component = (Math.floor(Math.random() * 255)).toString(16);
+        if (component.toString().length < 2) {
+          component = '0' + component.toString();
+        }
+        color = color + component;
+      }
+      return color;
+    };
   </script>
 </head>
 <body>

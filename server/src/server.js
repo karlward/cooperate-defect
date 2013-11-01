@@ -24,6 +24,7 @@ cd.data =
     "elapsedMS": 130765
   },
   "screen": {
+
     "width": 800,
     "height": 600,
     "frameRate": 10
@@ -64,10 +65,27 @@ cd.data =
   }
   ],
   "orbs": [
+<<<<<<< HEAD
   {
     "id": 0,
     "x": 88,
     "y": 690
+=======
+      {
+          "id": 0,
+          "x": 88,
+          "y": 390
+      }
+  ]
+};
+
+app.get('/orbs/:id', function (req, res) {
+  if (!!(cd.data.orbs[req.params.id])) {
+    var body = JSON.stringify(cd.data.orbs[req.params.id]);
+    res.set('Content-Type', 'application/json');
+    res.set('Content-Length', body.length);
+    res.end(body);
+>>>>>>> 26d4eca8ce77a503ea1c649c6ac712a6c628f283
   }
   ],
   "links": [
