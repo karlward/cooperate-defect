@@ -65,18 +65,40 @@ cd.data =
   }
   ],
   "orbs": [
-<<<<<<< HEAD
-  {
-    "id": 0,
-    "x": 88,
-    "y": 690
-=======
-      {
-          "id": 0,
-          "x": 88,
-          "y": 390
-      }
-  ]
+    {
+      "id": 0,
+      "x": 88,
+      "y": 690
+    }
+  ],
+  "links": [
+    {     
+      "source" :{ 
+        "id":0,
+        "x": 120,
+        "y": 185,
+      },
+      "target" :{ 
+        "id":1,
+        "x": 402,
+        "y": 300,
+      },
+      "value" : 1
+    },
+    {
+      "source" :{ 
+        "id":1,
+        "x": 120,
+        "y": 185,
+      },
+      "target" :{ 
+        "id":2,
+        "x": 20,
+        "y": 40,
+      },
+      "value" : 1
+    }
+  ],
 };
 
 app.get('/orbs/:id', function (req, res) {
@@ -85,36 +107,9 @@ app.get('/orbs/:id', function (req, res) {
     res.set('Content-Type', 'application/json');
     res.set('Content-Length', body.length);
     res.end(body);
->>>>>>> 26d4eca8ce77a503ea1c649c6ac712a6c628f283
   }
-  ],
-  "links": [
-  {     
-    "source" :{ 
-      "id":0,
-      "x": 120,
-      "y": 185
-    } ,
-    "target" :{ 
-      "id":1,
-      "x": 402,
-      "y": 300
-    },
-    "value" : 1},
-    {
-      "source" :{ 
-        "id":1,
-        "x": 120,
-        "y": 185
-      },
-      "target" :{ 
-        "id":2,
-        "x": 20,
-        "y": 40
-      },
-      "value" : 1}
-      ]
-    };
+});
+  
 
     app.get('/orbs/:id', function (req, res) {
       if (!!(cd.data.orbs[req.params.id])) {
