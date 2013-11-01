@@ -197,7 +197,7 @@ var randomRGB = function() {
 
 // create a new player
 app.post('/players\/?$', function(req, res) {
-  //console.log('in post for new player);
+  console.log('in post for new player');
   var newPlayer = {
         "id": cd.data.players.length,
         "name": null, // FIXME: implement
@@ -211,7 +211,9 @@ app.post('/players\/?$', function(req, res) {
   };
   cd.data.players.push(newPlayer);
   body = JSON.stringify(cd.data.players[newPlayer.id]);
-  res.end();
+  //console.log('body is ' + body);
+  //res.statusCode = 200;
+  res.end(body);
 });
 
 // serve index to browsers
