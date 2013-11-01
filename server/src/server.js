@@ -14,6 +14,7 @@ var cd = new Object(); // for cooperate-defect package globals
 // set some defaults
 cd.defaultRadius = 10;
 cd.defaultMass = 10;
+cd.defaultMinLinkDist = 10
 
 // FIXME: for now, load a game in code
 cd.data = 
@@ -180,7 +181,6 @@ app.patch('/players/:id', function(req, res) {
         //console.log('move up');
         if (cd.data.players[req.params.id].y > 0) {
           cd.data.players[req.params.id].y = cd.data.players[req.params.id].y - 10;
-          console.log(cd.data.links);
           for( l in cd.data.links){
             
             if(cd.data.links[l].source.id == req.params.id){
@@ -203,11 +203,11 @@ app.patch('/players/:id', function(req, res) {
           
           for( l in cd.data.links){
             console.log(l );
-            if(cd.data.links[l].id == req.params.id){
+            if(cd.data.links[l].source.id == req.params.id){
               cd.data.links[l].source.y  += 10;
             }
-            if(cd.data.links[l].id == req.params.id){
-              cd.data.links[l].y  += 10;
+            if(cd.data.links[l].target.id == req.params.id){
+              cd.data.links[l].target.y  += 10;
             }
           }
         }
@@ -215,11 +215,11 @@ app.patch('/players/:id', function(req, res) {
           cd.data.players[req.params.id].y = cd.data.screen.height;
           
           for( l in cd.data.links){
-            if(cd.data.links[l].id == req.params.id ){
+            if(cd.data.links[l].source.id == req.params.id ){
               cd.data.links[l].source.y  = cd.data.screen.height;
             }
-            if(cd.data.links[l].id == req.params.id){
-              cd.data.links[l].y = cd.data.screen.height;
+            if(cd.data.links[l].target.id == req.params.id){
+              cd.data.links[l].target.y = cd.data.screen.height;
             }
           }
         }
@@ -229,11 +229,11 @@ app.patch('/players/:id', function(req, res) {
           cd.data.players[req.params.id].x = cd.data.players[req.params.id].x - 10;
 
           for( l in cd.data.links){
-            if(cd.data.links[l].id == req.params.id){
+            if(cd.data.links[l].source.id == req.params.id){
               cd.data.links[l].source.x  -= 10;
             }
-            if(cd.data.links[l].id == req.params.id){
-              cd.data.links[l].x -= 10;
+            if(cd.data.links[l].target.id == req.params.id){
+              cd.data.links[l].target.x -= 10;
             }
           }
         }
@@ -241,11 +241,11 @@ app.patch('/players/:id', function(req, res) {
           cd.data.players[req.params.id].x = 0;
           
           for( l in cd.data.links){
-            if(cd.data.links[l].id == req.params.id){
+            if(cd.data.links[l].source.id == req.params.id){
               cd.data.links[l].source.x  = 0;
             }
-            if(cd.data.links[l].id == req.params.id){
-              cd.data.links[l].x = 0;
+            if(cd.data.links[l].target.id == req.params.id){
+              cd.data.links[l].target.x = 0;
             }
           }
         }
@@ -255,11 +255,11 @@ app.patch('/players/:id', function(req, res) {
           cd.data.players[req.params.id].x = cd.data.players[req.params.id].x + 10;
           
           for( l in cd.data.links){
-            if(cd.data.links[l].id == req.params.id){
+            if(cd.data.links[l].source.id == req.params.id){
               cd.data.links[l].source.x  += 10;
             }
-            if(cd.data.links[l].id == req.params.id){
-              cd.data.links[l].x += 10;
+            if(cd.data.links[l].target.id == req.params.id){
+              cd.data.links[l].target.x += 10;
             }
           }
         }
@@ -267,11 +267,11 @@ app.patch('/players/:id', function(req, res) {
           cd.data.players[req.params.id].x = cd.data.screen.width;
           
           for( l in cd.data.links){
-            if(cd.data.links[l].id == req.params.id){
+            if(cd.data.links[l].source.id == req.params.id){
               cd.data.links[l].source.x  = cd.data.screen.width;
             }
-            if(cd.data.links[l].id == req.params.id){
-              cd.data.links[l].x += cd.data.screen.width;
+            if(cd.data.links[l].target.id == req.params.id){
+              cd.data.links[l].target.x += cd.data.screen.width;
             }
           }
         }
@@ -281,6 +281,8 @@ app.patch('/players/:id', function(req, res) {
         res.statusCode = 400;
       }
     }
+
+    checkForLinks();
   }
   else {
     console.log('not a move or a state change');
@@ -295,10 +297,41 @@ var checkForLinks = function(){
           var dx = cd.data.players[i].x - cd.data.players[j].x;
           var dy = cd.data.players[i].y - cd.data.players[j].y;
           var dr = Math.sqrt(dx * dx + dy * dy);          
+            if(dr <= ( cd.data.players[i].radius + cd.data.players[j].radius) ){
+
+                addLink(cd.data.players[i].id, cd.data.players[i].id);
+
+            }
         } 
       }
     }  
 }
+
+var addLink = function(sourceId, targetId){
+
+    var newLink  = {     
+      "source" :{ 
+        "id":cd.data.players[sourceId].id,
+        "x": cd.data.players[sourceId].x,
+        "y": cd.data.players[sourceId].y
+      },
+      "target" :{ 
+        "id":cd.data.players[targetId].id,
+        "x": cd.data.players[targetId].x,
+        "y": cd.data.players[targetId].y
+      },
+      "value" : 1
+    };
+    
+    var output = '';
+    for (property in newLink) {
+      output += property + ': ' + newLink[property]+'; ';
+    }
+    console.log(output);
+    cd.data.links.push(newLink);
+
+}
+
 // return a random color, as an RGB hex string
 var randomRGB = function() {
   var color = '#';
