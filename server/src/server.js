@@ -333,15 +333,15 @@ var findDistance = function(obj1, obj2) {
     var dy = obj1.y - obj2.y;
     var dr = Math.sqrt(dx * dx + dy*dy);
     var d = (obj1.radius + obj2.radius) - dr ;
-    var r = obj1.radius + obj2.radius;
-    console.log(dr + " " +r + " " + "distance = " +  d);
+    // var r = obj1.radius + obj2.radius;
+    // console.log(dr + " " +r + " " + "distance = " +  d);
     return d;
   }
 };
 
 var checkForLinks = function(){
 
-    console.log("No. of Player : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
+    // console.log("No. of Player : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
     for( i in cd.data.players){
       for(j in cd.data.players){
         if(cd.data.players[i] !== null && cd.data.players[j] !==null){
@@ -391,24 +391,24 @@ var addLink = function(sourceId, targetId){
 
 var removeLink = function(id){
   var i = cd.data.links.length;
-
+  console.log("Checking for links to remove with id :" + id );
   while(i--){
-
+      console.log("Checking index :" + i);
     //if id is a link source remove that link
-    if(cd.data.links[i].sourceId == id){
+    if(cd.data.links[i].source.id == id){
         //remove link object
         console.log("Removing source link at index : " + i );
         cd.data.links.splice(i,1);
     } 
 
     //if id is a link target remove
-    if(cd.data.links[i].targetId == id){
+    if(cd.data.links[i].target.id == id){
       console.log("Removing target link at index : " + i );
       cd.data.links.splice(i,1);
     }
 
   }
-
+  console.log("Done Checking");
 }
 
 var hasLink = function(id1,id2){
