@@ -14,7 +14,8 @@ var cd = new Object(); // for cooperate-defect package globals
 // set some defaults
 cd.defaultRadius = 10;
 cd.defaultMass = 10;
-cd.defaultMinLinkDist = 10
+cd.defaultMinLinkDist = 10;
+cd.defaultState = "cooperate";
 
 // FIXME: for now, load a game in code
 cd.data = 
@@ -48,7 +49,7 @@ cd.data =
     "y": 300,
     "radius": 15,
     "mass": 15,
-    "state": "defect",
+    "state": "cooperate",
     "effect": "point",
     "color": "#00ff00",
   },
@@ -59,7 +60,7 @@ cd.data =
     "y": 40,
     "radius": 10,
     "mass": 10,
-    "state": "defect",
+    "state": "cooperate",
     "effect": "none",
     "color": "#0000ff",
   }
@@ -190,8 +191,9 @@ app.patch('/players/:id', function(req, res) {
       if ((req.body.state == 'cooperate') || (req.body.state == 'defect')) {
         //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
         cd.data.players[req.params.id].state = req.body.state;
+        console.log(cd.data.players[req.params.id].state);
           if(req.body.state == 'defect'){
-
+              removeLink(req.params.id);
           }
       }
       else {
@@ -306,7 +308,7 @@ app.patch('/players/:id', function(req, res) {
       }
     }
 
-    checkForLinks(); // FIXME: we should check at the end of each frame
+    checkForLinks();  // FIXME: we should check at the end of each frame
   }
   else {
     console.log('not a move or a state change');
@@ -322,19 +324,29 @@ var findDistance = function(obj1, obj2) {
     var dx = obj1.x - obj2.x;
     var dy = obj1.x - obj2.x;
     var dr = Math.sqrt(dx ^ 2 + dy ^ 2);
-    return (dr - obj1.radius + obj2.radius);
+    var d = dr - (obj1.radius + obj2.radius);
+    console.log("distance = " +  d);
+    return d;
   }
 };
 
 var checkForLinks = function(){
+
     for( i in cd.data.players){
       for(j in cd.data.players){
-        if(cd.data.players[i].id != cd.data.players[j].id){
-          if ((findDistance(cd.data.players[i].id, cd.data.players[j].id) <= 0) 
+        console.log(cd.data.players[i].id +" : "+cd.data.players[j].id);
+        
+        if(cd.data.players[i].id !== cd.data.players[j].id){
+          if ((findDistance(cd.data.players[i], cd.data.players[j]) <= 0) 
               && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
             addLink(cd.data.players[i].id, cd.data.players[j].id);
+          
           }
-        } 
+          else{
+            // console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
+          }
+
+        }
       }
     }  
 }
@@ -364,9 +376,20 @@ var removeLink = function(id){
   var i = cd.data.links.length;
 
   while(i--){
-    if(cd.data.links[i].sourceId == id){
 
+    //if id is a link source remove that link
+    if(cd.data.links[i].sourceId == id){
+        //remove link object
+        console.log("Removing source link at index : " + i );
+        cd.data.links.splice(i,1);
     } 
+
+    //if id is a link target remove
+    if(cd.data.links[i].targetId == id){
+      console.log("Removing target link at index : " + i );
+      cd.data.links.splice(i,1);
+    }
+
   }
 
 }
