@@ -192,8 +192,11 @@ app.patch('/players/:id', function(req, res) {
         //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
         cd.data.players[req.params.id].state = req.body.state;
         console.log(cd.data.players[req.params.id].state);
-          if(req.body.state == 'defect'){
-              removeLink(req.params.id);
+          if (req.body.state == 'cooperate') {
+            
+          }
+          else if (req.body.state == 'defect') {
+            removeLink(req.params.id);
           }
       }
       else {
@@ -207,32 +210,36 @@ app.patch('/players/:id', function(req, res) {
         //console.log('move up');
         if (cd.data.players[req.params.id].y > 0) {
           cd.data.players[req.params.id].y = cd.data.players[req.params.id].y - 10;
-          for( l in cd.data.links){
-            
-            if(cd.data.links[l].source.id == req.params.id){
+          for (l in cd.data.links) {
+            if (cd.data.links[l].source.id == req.params.id) {
               cd.data.links[l].source.y  -= 10;
             }
-            if(cd.data.links[l].target.id == req.params.id){
+            if (cd.data.links[l].target.id == req.params.id) {
               cd.data.links[l].target.y  -= 10;
             }
           }
         }
         else {
           cd.data.players[req.params.id].y = 0;
-          cd.data.links.source[req.params.id].y = 0; 
-          cd.data.links.target[req.params.id].y = 0;           
+          for (l in cd.data.links) {
+            if (cd.data.links[l].source.id == req.params.id) {
+              cd.data.links[l].source.y  = 0;
+            }
+            if (cd.data.links[l].target.id == req.params.id) {
+              cd.data.links[l].target.y = 0;
+            }
+          }
         }
       }
       else if (req.body.move == 'down') {
         if (cd.data.players[req.params.id].y < cd.data.screen.height) {
           cd.data.players[req.params.id].y = cd.data.players[req.params.id].y + 10;
-          
-          for( l in cd.data.links){
-            console.log(l );
-            if(cd.data.links[l].source.id == req.params.id){
+          for (l in cd.data.links) {
+            console.log(l);
+            if (cd.data.links[l].source.id == req.params.id) {
               cd.data.links[l].source.y  += 10;
             }
-            if(cd.data.links[l].target.id == req.params.id){
+            if (cd.data.links[l].target.id == req.params.id) {
               cd.data.links[l].target.y  += 10;
             }
           }
@@ -240,11 +247,11 @@ app.patch('/players/:id', function(req, res) {
         else {
           cd.data.players[req.params.id].y = cd.data.screen.height;
           
-          for( l in cd.data.links){
-            if(cd.data.links[l].source.id == req.params.id ){
+          for (l in cd.data.links) {
+            if (cd.data.links[l].source.id == req.params.id) {
               cd.data.links[l].source.y  = cd.data.screen.height;
             }
-            if(cd.data.links[l].target.id == req.params.id){
+            if (cd.data.links[l].target.id == req.params.id) {
               cd.data.links[l].target.y = cd.data.screen.height;
             }
           }
@@ -254,11 +261,11 @@ app.patch('/players/:id', function(req, res) {
         if (cd.data.players[req.params.id].x > 0) {
           cd.data.players[req.params.id].x = cd.data.players[req.params.id].x - 10;
 
-          for( l in cd.data.links){
-            if(cd.data.links[l].source.id == req.params.id){
+          for (l in cd.data.links){
+            if (cd.data.links[l].source.id == req.params.id) {
               cd.data.links[l].source.x  -= 10;
             }
-            if(cd.data.links[l].target.id == req.params.id){
+            if (cd.data.links[l].target.id == req.params.id) {
               cd.data.links[l].target.x -= 10;
             }
           }
@@ -266,11 +273,11 @@ app.patch('/players/:id', function(req, res) {
         else {
           cd.data.players[req.params.id].x = 0;
           
-          for( l in cd.data.links){
-            if(cd.data.links[l].source.id == req.params.id){
+          for (l in cd.data.links){
+            if (cd.data.links[l].source.id == req.params.id) {
               cd.data.links[l].source.x  = 0;
             }
-            if(cd.data.links[l].target.id == req.params.id){
+            if (cd.data.links[l].target.id == req.params.id) {
               cd.data.links[l].target.x = 0;
             }
           }
@@ -280,11 +287,11 @@ app.patch('/players/:id', function(req, res) {
         if (cd.data.players[req.params.id].x < cd.data.screen.height) {
           cd.data.players[req.params.id].x = cd.data.players[req.params.id].x + 10;
           
-          for( l in cd.data.links){
-            if(cd.data.links[l].source.id == req.params.id){
+          for (l in cd.data.links){
+            if (cd.data.links[l].source.id == req.params.id) {
               cd.data.links[l].source.x  += 10;
             }
-            if(cd.data.links[l].target.id == req.params.id){
+            if (cd.data.links[l].target.id == req.params.id) {
               cd.data.links[l].target.x += 10;
             }
           }
@@ -292,11 +299,11 @@ app.patch('/players/:id', function(req, res) {
         else {
           cd.data.players[req.params.id].x = cd.data.screen.width;
           
-          for( l in cd.data.links){
-            if(cd.data.links[l].source.id == req.params.id){
+          for (l in cd.data.links){
+            if (cd.data.links[l].source.id == req.params.id) {
               cd.data.links[l].source.x  = cd.data.screen.width;
             }
-            if(cd.data.links[l].target.id == req.params.id){
+            if (cd.data.links[l].target.id == req.params.id) {
               cd.data.links[l].target.x += cd.data.screen.width;
             }
           }
