@@ -193,6 +193,14 @@
       cd.d3links = cd.svg.selectAll("line.link")
         .data(cd.data.links);
       cd.d3links
+      .attr("line.link","update")
+      .transition()
+      .attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; });
+
+      cd.d3links
         .enter()
         .append("line")
         .attr("class","link")
