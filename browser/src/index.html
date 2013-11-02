@@ -106,6 +106,20 @@
         .attr('width', cd.data.screen["width"])
         .attr('height', cd.data.screen["height"]);
 
+    cd.d3link = cd.svg.selectAll("line.link")
+            .data(cd.data.links)
+            .enter().append("svg:line")
+            .attr("class","link")
+            .attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; })
+            .attr("stroke", "blue")
+            .attr("stroke-width", 1)
+            .attr("fill", "none");
+
+         
+
       // store d3 elements for players in a convenient variable
       cd.d3players = cd.svg.selectAll('circle.player')
         .data(cd.data.players)
@@ -143,14 +157,7 @@
 //        .attr('stroke', 'black');
       
 
-      cd.d3link = cd.svg.selectAll("line.link")
-        .data(cd.data.links)
-        .enter().append("svg:line")
-        .attr("class", function (d) { return "link" + d.value +""; })
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+      
 
       /*
       selectAll('path.link')
@@ -182,6 +189,23 @@
     var updateFrame = function() {
       //console.log('in updateFrame() at frame rate ' + cd.data.screen.frameRate);
       getGameData();
+      
+      cd.d3link = cd.svg.selectAll("line.link").data(cd.data.links);
+      cd.d3link
+        .enter()
+        .append("svg:line")
+        .attr("class","link")
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; })
+        .attr("stroke", "blue")
+        .attr("stroke-width", 1)
+        .attr("fill", "none");
+
+      cd.d3link.exit() 
+        .remove();   
+
       cd.d3players = cd.svg.selectAll("circle.player").data(cd.data.players);
       cd.d3players
         .enter() // add any new players that have appeared in the data
@@ -201,17 +225,7 @@
         })
         .attr('stroke', 'black');
 
-      cd.d3link = cd.svg.selectAll("line.link")
-        .data(cd.data.links)
-        .enter().append("line")
-        .attr("class","link")
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; })
-        .attr("stroke", "blue")
-        .attr("stroke-width", 1)
-        .attr("fill", "none");
+      
       
       // cd.d3link
       // .exit()
