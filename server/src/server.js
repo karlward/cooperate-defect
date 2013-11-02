@@ -78,32 +78,32 @@ cd.data =
 
   ],
   "links": [
-    {     
-      "source" :{ 
-        "id":0,
-        "x": 120,
-        "y": 185,
-      },
-      "target" :{ 
-        "id":1,
-        "x": 402,
-        "y": 300,
-      },
-      "value" : 1
-    },
-    {
-      "source" :{ 
-        "id":1,
-        "x": 120,
-        "y": 185,
-      },
-      "target" :{ 
-        "id":2,
-        "x": 20,
-        "y": 40,
-      },
-      "value" : 1
-    }
+    // {     
+    //   "source" :{ 
+    //     "id":0,
+    //     "x": 120,
+    //     "y": 185,
+    //   },
+    //   "target" :{ 
+    //     "id":1,
+    //     "x": 402,
+    //     "y": 300,
+    //   },
+    //   "value" : 1
+    // },
+    // {
+    //   "source" :{ 
+    //     "id":1,
+    //     "x": 120,
+    //     "y": 185,
+    //   },
+    //   "target" :{ 
+    //     "id":2,
+    //     "x": 20,
+    //     "y": 40,
+    //   },
+    //   "value" : 1
+    // }
   ]
 };
 
@@ -111,12 +111,15 @@ var updateFrame = function() {
   if (cd.data.orbs.length === 0) {
     createOrb();
   }
-  //updateLinks();
+
+  updateLinks();
   //updatePlayers();
   updateOrbs();
   //updateLeaderBoard();
 };
-
+var updateLinks = function(){
+    checkForLinks();
+}
 var updateOrbs = function() {
   for (i in cd.data.orbs) {
     cd.data.orbs[i].x = cd.data.orbs[i].x + cd.data.orbs[i].xSpeed;
@@ -191,7 +194,7 @@ app.patch('/players/:id', function(req, res) {
       if ((req.body.state == 'cooperate') || (req.body.state == 'defect')) {
         //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
         cd.data.players[req.params.id].state = req.body.state;
-        console.log(cd.data.players[req.params.id].state);
+        console.log("State changed!" + cd.data.players[req.params.id].state);
           if (req.body.state == 'cooperate') {
             
           }
@@ -314,8 +317,6 @@ app.patch('/players/:id', function(req, res) {
         res.statusCode = 400;
       }
     }
-
-    checkForLinks();  // FIXME: we should check at the end of each frame
   }
   else {
     console.log('not a move or a state change');
@@ -329,31 +330,39 @@ app.patch('/players/:id', function(req, res) {
 var findDistance = function(obj1, obj2) {
   if ((obj1 !== null) && (obj2 !== null)) {
     var dx = obj1.x - obj2.x;
-    var dy = obj1.x - obj2.x;
-    var dr = Math.sqrt(dx ^ 2 + dy ^ 2);
-    var d = dr - (obj1.radius + obj2.radius);
-    console.log("distance = " +  d);
+    var dy = obj1.y - obj2.y;
+    var dr = Math.sqrt(dx * dx + dy*dy);
+    var d = (obj1.radius + obj2.radius) - dr ;
+    var r = obj1.radius + obj2.radius;
+    console.log(dr + " " +r + " " + "distance = " +  d);
     return d;
   }
 };
 
 var checkForLinks = function(){
 
+    console.log("No. of Player : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
     for( i in cd.data.players){
       for(j in cd.data.players){
-        console.log(cd.data.players[i].id +" : "+cd.data.players[j].id);
-        
-        if(cd.data.players[i].id !== cd.data.players[j].id){
-          if ((findDistance(cd.data.players[i], cd.data.players[j]) <= 0) 
-              && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
-            addLink(cd.data.players[i].id, cd.data.players[j].id);
+        if(cd.data.players[i] !== null && cd.data.players[j] !==null){
+            
+          // console.log(cd.data.players[i].id +" : "+cd.data.players[j].id);
           
-          }
-          else{
-            // console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
-          }
-
+          if(cd.data.players[i].id !== cd.data.players[j].id){
+            if ((findDistance(cd.data.players[i], cd.data.players[j]) >= 0) 
+                && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
+              addLink(cd.data.players[i].id, cd.data.players[j].id);
+            
+            }
+            else{
+              // console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
+            }
+          }  
         }
+        else{
+          console.log("Some players id is null");
+        }
+        
       }
     }  
 }
@@ -374,7 +383,8 @@ var addLink = function(sourceId, targetId){
         },
         "value" : 1
       };
-      // console.log(output);
+
+      console.log("Added new link");
       cd.data.links.push(newLink);
   }
 }
@@ -450,6 +460,7 @@ app.post('/players\/?$', function(req, res) {
     "effect": "new",
     "color": randomRGB(),
   };
+  console.log("New Player added !");
   cd.data.players.push(newPlayer);
   body = JSON.stringify(cd.data.players[newPlayer.id]);
   //console.log('body is ' + body);
