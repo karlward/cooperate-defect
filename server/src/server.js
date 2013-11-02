@@ -190,6 +190,9 @@ app.patch('/players/:id', function(req, res) {
       if ((req.body.state == 'cooperate') || (req.body.state == 'defect')) {
         //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
         cd.data.players[req.params.id].state = req.body.state;
+          if(req.body.state == 'defect'){
+
+          }
       }
       else {
         //console.log('state change specified but it is not cooperate or defect: ' + req.body.state);
@@ -331,16 +334,6 @@ var checkForLinks = function(){
               && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
             addLink(cd.data.players[i].id, cd.data.players[j].id);
           }
-/*
-          var dx = cd.data.players[i].x - cd.data.players[j].x;
-          var dy = cd.data.players[i].y - cd.data.players[j].y;
-          var dr = Math.sqrt(dx * dx + dy * dy);          
-            if(dr <= ( cd.data.players[i].radius + cd.data.players[j].radius) ){
-
-                addLink(cd.data.players[i].id, cd.data.players[j].id);
-
-            }
-*/
         } 
       }
     }  
@@ -348,27 +341,56 @@ var checkForLinks = function(){
 
 var addLink = function(sourceId, targetId){
 
-    var newLink  = {     
-      "source" :{ 
-        "id":cd.data.players[sourceId].id,
-        "x": cd.data.players[sourceId].x,
-        "y": cd.data.players[sourceId].y
-      },
-      "target" :{ 
-        "id":cd.data.players[targetId].id,
-        "x": cd.data.players[targetId].x,
-        "y": cd.data.players[targetId].y
-      },
-      "value" : 1
-    };
-    
-    var output = '';
-    for (property in newLink) {
-      output += property + ': ' + newLink[property]+'; ';
-    }
-    console.log(output);
-    cd.data.links.push(newLink);
+  if(hasLink(sourceId, targetId) == false){
+  var newLink  = {     
+        "source" :{ 
+          "id":cd.data.players[sourceId].id,
+          "x": cd.data.players[sourceId].x,
+          "y": cd.data.players[sourceId].y
+        },
+        "target" :{ 
+          "id":cd.data.players[targetId].id,
+          "x": cd.data.players[targetId].x,
+          "y": cd.data.players[targetId].y
+        },
+        "value" : 1
+      };
+      // console.log(output);
+      cd.data.links.push(newLink);
+  }
+}
 
+var removeLink = function(id){
+  var i = cd.data.links.length;
+
+  while(i--){
+    if(cd.data.links[i].sourceId == id){
+
+    } 
+  }
+
+}
+
+var hasLink = function(id1,id2){
+  for(i in cd.data.links){
+    if(cd.data.links[i].source.id == id1){
+        if(cd.data.links[i].target.id == id2){
+          return true;
+          console.log("Link found between id :" + id1 + " and id :" +id2);
+        }
+    }
+  }   
+
+  for(j in cd.data.links){
+    if(cd.data.links[j].source.id == id2){
+      if(cd.data.links[j].target.id == id1){
+        console.log("Link found between id :" + id1 + " and id :" +id2);
+        return true;
+      }
+    }
+  }
+  console.log(" No Link found between id :" + id1 + " and id :" +id2);
+  return false;
 }
 
 // return a random color, as an RGB hex string

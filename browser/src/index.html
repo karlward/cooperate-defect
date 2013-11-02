@@ -75,12 +75,12 @@
         }
       });
     });
-      //this function is used to draw the links. It allows us to decide how to handle the data an interpolate the
-    
+
+    //this function is used to draw the links. It allows us to decide how to handle the data an interpolate the
     var lineFunction = d3.svg.line()
-                            .x(function(d) { return d.source.x; })
-                            .y(function(d) { return d.target; })
-                             .interpolate("basis");
+      .x(function(d) { return d.source.x; })
+      .y(function(d) { return d.target; })
+      .interpolate("basis");
     
     // var tick = function() {
     // path.attr("d", function(d) {
@@ -98,7 +98,8 @@
     // node
     //     .attr("transform", function(d) { 
     //         return "translate(" + d.x + "," + d.y + ")"; });
-    // } ;                            
+    // } ;       
+
     // initial setup of the screen, which is just an SVG element in the browser window
     var initScreen = function() {
       cd.svg = d3.select('body')
@@ -106,7 +107,7 @@
         .attr('width', cd.data.screen["width"])
         .attr('height', cd.data.screen["height"]);
 
-      cd.d3link = cd.svg.selectAll("line.link")
+      cd.d3links = cd.svg.selectAll("line.link")
         .data(cd.data.links)
         .enter()
         .append("line")
@@ -130,7 +131,7 @@
         .attr("stroke-width", 1)
         .attr("fill", "none");
     */
-    
+
       // store d3 elements for players in a convenient variable
       cd.d3players = cd.svg.selectAll('circle.player')
         .data(cd.data.players)
@@ -189,9 +190,9 @@
       //console.log('in updateFrame() at frame rate ' + cd.data.screen.frameRate);
       getGameData();
       
-      cd.d3link = cd.svg.selectAll("line.link")
+      cd.d3links = cd.svg.selectAll("line.link")
         .data(cd.data.links);
-      cd.d3link
+      cd.d3links
         .enter()
         .append("line")
         .attr("class","link")
@@ -203,10 +204,10 @@
         .attr("stroke-width", 1)
         .attr("fill", "none");
     
-      cd.d3link
+      cd.d3links
        .exit()
        .remove();
-    
+
       cd.d3players = cd.svg.selectAll("circle.player").data(cd.data.players);
       cd.d3players
         .enter() // add any new players that have appeared in the data
@@ -259,9 +260,11 @@
           return d.x;
         })
         .attr('cy', function(d) {
-            return d.y;
+          return d.y;
         })
-        .attr('r', 5)
+        .attr('r', function(d) {
+          return d.radius;
+        })
         .attr('fill', randomRGB());
 //        .attr('stroke', 'black');
       cd.d3orbs // remove any orbs that don't exist in the data anymore
@@ -286,7 +289,6 @@
         .style("fill-opacity", 1)
         .attr('fill', randomRGB()) // color changes at random
         .attr('stroke', randomRGB());
-      
     };
 
     // return a random color, as an RGB hex string
