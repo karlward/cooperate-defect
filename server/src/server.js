@@ -25,7 +25,6 @@ cd.data =
     "elapsedMS": 130765
   },
   "screen": {
-
     "width": 800,
     "height": 600,
     "frameRate": 10
@@ -69,8 +68,11 @@ cd.data =
 
     {
       "id": 0,
-      "x": 88,
-      "y": 690
+      "x": 250,
+      "y": 250,
+      "radius": cd.defaultRadius,
+      "xSpeed": 5,
+      "ySpeed": 5
     }
 
   ],
@@ -104,56 +106,61 @@ cd.data =
   ]
 };
 
+var updateFrame = function() {
+  if (cd.data.orbs.length === 0) {
+    createOrb();
+  }
+  //updateLinks();
+  //updatePlayers();
+  updateOrbs();
+  //updateLeaderBoard();
+};
+
+var updateOrbs = function() {
+  for (i in cd.data.orbs) {
+    cd.data.orbs[i].x = cd.data.orbs[i].x + cd.data.orbs[i].xSpeed;
+    cd.data.orbs[i].y = cd.data.orbs[i].y + cd.data.orbs[i].ySpeed;
+    if ((cd.data.orbs[i].x >= cd.data.screen.width)
+        || (cd.data.orbs[i].x <= 0)
+        || (cd.data.orbs[i].y >= cd.data.screen.height)
+        || (cd.data.orbs[i].y <= 0)) {
+      console.log("removing orb");
+      cd.data.orbs.splice(i); // remove it, no player captured this orb
+    }
+  }
+};
+
+//this updates game state
+setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
+
 app.get('/orbs/:id', function (req, res) {
   if (!!(cd.data.orbs[req.params.id])) {
     var body = JSON.stringify(cd.data.orbs[req.params.id]);
     res.set('Content-Type', 'application/json');
     res.set('Content-Length', body.length);
     res.end(body);
-
   }
-});
-
-  
-
-app.get('/orbs/:id', function (req, res) {
-  if (!!(cd.data.orbs[req.params.id])) {
-    var body = JSON.stringify(cd.data.orbs[req.params.id]);
-    res.set('Content-Type', 'application/json');
-    res.set('Content-Length', body.length);
-    res.end(body);
-  }
-});
-  
-
-    app.get('/orbs/:id', function (req, res) {
-      if (!!(cd.data.orbs[req.params.id])) {
-        var body = JSON.stringify(cd.data.orbs[req.params.id]);
-        res.set('Content-Type', 'application/json');
-        res.set('Content-Length', body.length);
-        res.end(body);
-      }
-      else {
-    //console.log('req for non-existent player id');
+  else {
+    //console.log('req for non-existent orb id');
     res.statusCode = 400;
     res.end();
   }
 });
 
-    app.get('/orbs\/?$', function (req, res) {
-      if (!!(cd.data.orbs)) {
-        var body = JSON.stringify(cd.data.orbs);
-        res.set('Content-Type', 'application/json');
-        res.set('Content-Length', body.length);
-        res.end(body);
-      }
-      else {
-        res.statusCode = 400;
-        res.end();
-      }
-    });
+app.get('/orbs\/?$', function (req, res) {
+  if (!!(cd.data.orbs)) {
+    var body = JSON.stringify(cd.data.orbs);
+    res.set('Content-Type', 'application/json');
+    res.set('Content-Length', body.length);
+    res.end(body);
+  }
+  else {
+    res.statusCode = 400;
+    res.end();
+  }
+});
 
-    app.get('/players/:id', function(req, res) {
+app.get('/players/:id', function(req, res) {
   if (!!cd.data.players[req.params.id]) { // FIXME: is this the right null test?
     var body = JSON.stringify(cd.data.players[req.params.id]);
     res.set('Content-Type', 'application/json');
@@ -166,11 +173,11 @@ app.get('/orbs/:id', function (req, res) {
   }
 });
 
-    app.get('/players\/?$', function(req, res) {
-      var body = JSON.stringify(cd.data.players);
-      res.set('Content-Type', 'application/json');
-      res.set('Content-Length', body.length);
-      res.end(body);
+app.get('/players\/?$', function(req, res) {
+  var body = JSON.stringify(cd.data.players);
+  res.set('Content-Type', 'application/json');
+  res.set('Content-Length', body.length);
+  res.end(body);
   // FIXME: error handling
 });
 
@@ -296,7 +303,7 @@ app.patch('/players/:id', function(req, res) {
       }
     }
 
-    checkForLinks();
+    checkForLinks(); // FIXME: we should check at the end of each frame
   }
   else {
     console.log('not a move or a state change');
@@ -304,18 +311,36 @@ app.patch('/players/:id', function(req, res) {
   } res.end();  
 });
 
+// find distance between two objects, return distance in pixels
+// if return value is 0, objects are touching
+// if return value is negative, objects are touching and overlapping
+var findDistance = function(obj1, obj2) {
+  if ((obj1 !== null) && (obj2 !== null)) {
+    var dx = obj1.x - obj2.x;
+    var dy = obj1.x - obj2.x;
+    var dr = Math.sqrt(dx ^ 2 + dy ^ 2);
+    return (dr - obj1.radius + obj2.radius);
+  }
+};
+
 var checkForLinks = function(){
     for( i in cd.data.players){
       for(j in cd.data.players){
         if(cd.data.players[i].id != cd.data.players[j].id){
+          if ((findDistance(cd.data.players[i].id, cd.data.players[j].id) <= 0) 
+              && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
+            addLink(cd.data.players[i].id, cd.data.players[j].id);
+          }
+/*
           var dx = cd.data.players[i].x - cd.data.players[j].x;
           var dy = cd.data.players[i].y - cd.data.players[j].y;
           var dr = Math.sqrt(dx * dx + dy * dy);          
             if(dr <= ( cd.data.players[i].radius + cd.data.players[j].radius) ){
 
-                addLink(cd.data.players[i].id, cd.data.players[i].id);
+                addLink(cd.data.players[i].id, cd.data.players[j].id);
 
             }
+*/
         } 
       }
     }  
@@ -364,17 +389,17 @@ app.post('/players\/?$', function(req, res) {
   console.log('in post for new player');
   var newPlayer = {
     "id": cd.data.players.length,
-        "name": null, // FIXME: implement
-        "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
-        "y": Math.floor(Math.random() * cd.data.screen.height),
-        "radius": cd.defaultRadius,
-        "mass": cd.defaultMass,
-        "state": cd.defaultState,
-        "effect": "new",
-        "color": randomRGB(),
-      };
-      cd.data.players.push(newPlayer);
-      body = JSON.stringify(cd.data.players[newPlayer.id]);
+    "name": null, // FIXME: implement
+    "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
+    "y": Math.floor(Math.random() * cd.data.screen.height),
+    "radius": cd.defaultRadius,
+    "mass": cd.defaultMass,
+    "state": cd.defaultState,
+    "effect": "new",
+    "color": randomRGB(),
+  };
+  cd.data.players.push(newPlayer);
+  body = JSON.stringify(cd.data.players[newPlayer.id]);
   //console.log('body is ' + body);
   //res.statusCode = 200;
   res.end(body);
@@ -404,3 +429,25 @@ app.get('/games', function(req, res) {
   console.log('request for /games');
   // FIXME: error handling
 });
+
+var flipCoin = function() {
+  if (Math.random() < 0.5) {
+    return -1;
+  }
+  else {
+    return 1;
+  }
+};
+
+// add a new orb
+var createOrb = function() {
+  console.log("in createOrb");
+  var orb = new Object();
+  orb.x = Math.floor(Math.random() * cd.data.screen.width);
+  orb.y = Math.floor(Math.random() * cd.data.screen.height);
+  orb.radius = cd.defaultRadius;
+  orb.id = cd.data.orbs.length;
+  orb.xSpeed = Math.ceil(Math.random() * 10) * flipCoin();
+  orb.ySpeed = Math.ceil(Math.random() * 10) * flipCoin();
+  cd.data.orbs.push(orb);
+}
