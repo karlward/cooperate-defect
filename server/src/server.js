@@ -41,6 +41,8 @@ cd.data =
     "state": "cooperate",
     "effect": "none",
     "color": "#ff0000",
+    "score": 10,
+    "currentRank": 1
   },
   {
     "id": 1,
@@ -52,6 +54,8 @@ cd.data =
     "state": "cooperate",
     "effect": "point",
     "color": "#00ff00",
+    "score": 30,
+    "currentRank": 2
   },
   {
     "id": 2,
@@ -63,6 +67,8 @@ cd.data =
     "state": "cooperate",
     "effect": "none",
     "color": "#0000ff",
+    "score": 20,
+    "currentRank": 3
   }
   ],
   "orbs": [
@@ -78,32 +84,37 @@ cd.data =
 
   ],
   "links": [
-    // {     
-    //   "source" :{ 
-    //     "id":0,
-    //     "x": 120,
-    //     "y": 185,
-    //   },
-    //   "target" :{ 
-    //     "id":1,
-    //     "x": 402,
-    //     "y": 300,
-    //   },
-    //   "value" : 1
-    // },
-    // {
-    //   "source" :{ 
-    //     "id":1,
-    //     "x": 120,
-    //     "y": 185,
-    //   },
-    //   "target" :{ 
-    //     "id":2,
-    //     "x": 20,
-    //     "y": 40,
-    //   },
-    //   "value" : 1
-    // }
+    /*
+    {     
+      "source" :{ 
+        "id":0,
+        "x": 120,
+        "y": 185,
+      },
+      "target" :{ 
+        "id":1,
+        "x": 402,
+        "y": 300,
+      },
+      "value" : 1
+    },
+    {
+      "source" :{ 
+        "id":1,
+        "x": 120,
+        "y": 185,
+      },
+      "target" :{ 
+        "id":2,
+        "x": 20,
+        "y": 40,
+      },
+      "value" : 1
+    }
+    */
+  ],
+  "leaderBoard":[
+
   ]
 };
 
@@ -115,8 +126,32 @@ var updateFrame = function() {
   updateLinks();
   //updatePlayers();
   updateOrbs();
-  //updateLeaderBoard();
+  updateLeaderBoard();
 };
+
+var updateLeaderBoard = function(){
+
+  // var playersCopy = cd.data.players;
+  // playersCopy.sort(sortBy("score"));
+
+
+  // for(i in playersCopy){
+  //   console.log(playersCopy[i].id +" : "+playersCopy[i].score)
+
+  // }
+  
+}
+function sortBy(prop){
+   return function(a,b){
+      if( a[prop] > b[prop]){
+          return 1;
+      }else if( a[prop] < b[prop] ){
+          return -1;
+      }
+      return 0;
+   }
+}
+
 var updateLinks = function(){
     checkForLinks();
 }
@@ -304,7 +339,7 @@ app.patch('/players/:id', function(req, res) {
           
           for (l in cd.data.links){
             if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.x  = cd.data.screen.width;
+              cd.data.links[l].source.x  += cd.data.screen.width;
             }
             if (cd.data.links[l].target.id == req.params.id) {
               cd.data.links[l].target.x += cd.data.screen.width;
@@ -459,6 +494,8 @@ app.post('/players\/?$', function(req, res) {
     "state": cd.defaultState,
     "effect": "new",
     "color": randomRGB(),
+    "score": 0,
+    "currentRank":cd.data.players.length
   };
   console.log("New Player added !");
   cd.data.players.push(newPlayer);
