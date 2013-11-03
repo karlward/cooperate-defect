@@ -36,6 +36,8 @@ cd.data =
     "name": "Surya",
     "x": 120,
     "y": 185,
+    "xSpeed": 0,
+    "ySpeed": 0,
     "radius": 40,
     "mass": 40,
     "state": "cooperate",
@@ -49,6 +51,8 @@ cd.data =
     "name": "Jon",
     "x": 402,
     "y": 300,
+    "xSpeed": 0,
+    "ySpeed": 0,
     "radius": 15,
     "mass": 15,
     "state": "cooperate",
@@ -62,6 +66,8 @@ cd.data =
     "name": "Karl",
     "x": 20,
     "y": 40,
+    "xSpeed": 0,
+    "ySpeed": 0,
     "radius": 10,
     "mass": 10,
     "state": "cooperate",
@@ -77,9 +83,9 @@ cd.data =
       "id": 0,
       "x": 250,
       "y": 250,
-      "radius": cd.defaultRadius,
       "xSpeed": 5,
-      "ySpeed": 5
+      "ySpeed": 5,
+      "radius": cd.defaultRadius,
     }
 
   ],
@@ -124,10 +130,28 @@ var updateFrame = function() {
   }
 
   updateLinks();
-  //updatePlayers();
+  updatePlayers();
   updateOrbs();
   //FIXME: I dont think this needs to be updated every frame. It should do it anytime an orb is eaten by a player.
   updateLeaderBoard();
+};
+
+var updatePlayers = function() {
+  cd.data.players.forEach(function(element, index, array) {
+    if (element.xSpeed > 0) {
+      element.xSpeed--; // slow yo roll dawg
+    }
+    else if (element.xSpeed < 0) {
+      element.xSpeed++;  // slow yo negative roll
+    }
+    
+    if (element.ySpeed > 0) {
+      element.ySpeed--;
+    }
+    else if (element.ySpeed < 0) {
+      element.ySpeed++;
+    }
+  });
 };
 
 var updateLeaderBoard = function(){
@@ -232,6 +256,49 @@ app.get('/players\/?$', function(req, res) {
   // FIXME: error handling
 });
 
+var movePlayer = function(playerId, direction) {
+  //console.log('in movePlayer for player ' + playerId + ' direction ' + direction);
+  if (!!cd.data.players[playerId]) {
+    if (direction === 'up') {
+      cd.data.players[playerId].ySpeed = -10;
+    }
+    else if (direction === 'down') {
+      cd.data.players[playerId].ySpeed = 10;
+    }
+    else if (direction === 'left') {
+      cd.data.players[playerId].xSpeed = -10;
+    }
+    else if (direction === 'right') {
+      cd.data.players[playerId].xSpeed = 10;
+    }
+    var newX = cd.data.players[playerId].x + cd.data.players[playerId].xSpeed;
+    if (newX < 0) {
+      newX = 0;
+    }
+    else if (newX > cd.data.screen.width) {
+      newX = cd.data.screen.width;
+    }
+    cd.data.players[playerId].x = newX;
+
+    var newY = cd.data.players[playerId].y + cd.data.players[playerId].ySpeed;
+    if (newY < 0) {
+      newY = 0;
+    }
+    else if (newY > cd.data.screen.height) {
+      newY = cd.data.screen.height;
+    }
+    cd.data.players[playerId].y = newY;
+    
+    // update links here
+    cd.data.links.forEach(function(element, index, array) {
+      element.source.x = cd.data.players[element.source.id].x;
+      element.source.y = cd.data.players[element.source.id].y;
+      element.target.x = cd.data.players[element.target.id].x;
+      element.target.y = cd.data.players[element.target.id].y;
+    });
+  }
+};
+
 // update movement and cooperate/defect status for a player
 app.patch('/players/:id', function(req, res) {
   //console.log('in patch for player ' + req.params.id);
@@ -242,127 +309,20 @@ app.patch('/players/:id', function(req, res) {
         //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
         cd.data.players[req.params.id].state = req.body.state;
         console.log("State changed!" + cd.data.players[req.params.id].state);
-          if (req.body.state == 'cooperate') {
-            
-          }
-          else if (req.body.state == 'defect') {
-            removeLink(req.params.id);
-          }
+        if (req.body.state == 'cooperate') {
+          
+        }
+        else if (req.body.state == 'defect') {
+          removeLink(req.params.id);
+        }
       }
       else {
         //console.log('state change specified but it is not cooperate or defect: ' + req.body.state);
         res.statusCode = 400;
       }
     }
-    
-    if (!!req.body.move) {
-      if (req.body.move == 'up') {
-        //console.log('move up');
-        if (cd.data.players[req.params.id].y > 0) {
-          cd.data.players[req.params.id].y = cd.data.players[req.params.id].y - 10;
-          for (l in cd.data.links) {
-            if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.y  -= 10;
-            }
-            if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.y  -= 10;
-            }
-          }
-        }
-        else {
-          cd.data.players[req.params.id].y = 0;
-          for (l in cd.data.links) {
-            if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.y  = 0;
-            }
-            if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.y = 0;
-            }
-          }
-        }
-      }
-      else if (req.body.move == 'down') {
-        if (cd.data.players[req.params.id].y < cd.data.screen.height) {
-          cd.data.players[req.params.id].y = cd.data.players[req.params.id].y + 10;
-          for (l in cd.data.links) {
-            console.log(l);
-            if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.y  += 10;
-            }
-            if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.y  += 10;
-            }
-          }
-        }
-        else {
-          cd.data.players[req.params.id].y = cd.data.screen.height;
-          
-          for (l in cd.data.links) {
-            if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.y  = cd.data.screen.height;
-            }
-            if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.y = cd.data.screen.height;
-            }
-          }
-        }
-      }
-      else if (req.body.move == 'left') {
-        if (cd.data.players[req.params.id].x > 0) {
-          cd.data.players[req.params.id].x = cd.data.players[req.params.id].x - 10;
-
-          for (l in cd.data.links){
-            if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.x  -= 10;
-            }
-            if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.x -= 10;
-            }
-          }
-        }
-        else {
-          cd.data.players[req.params.id].x = 0;
-          
-          for (l in cd.data.links){
-            if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.x  = 0;
-            }
-            if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.x = 0;
-            }
-          }
-        }
-      }
-      else if (req.body.move == 'right') {
-        if (cd.data.players[req.params.id].x < cd.data.screen.width) {
-          cd.data.players[req.params.id].x = cd.data.players[req.params.id].x + 10;
-          
-          for (l in cd.data.links){
-            if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.x  += 10;
-            }
-            if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.x += 10;
-            }
-          }
-        }
-        else {
-          cd.data.players[req.params.id].x = cd.data.screen.width;
-          
-          for (l in cd.data.links){
-            if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.x  = cd.data.screen.width;
-            }
-            if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.x = cd.data.screen.width;
-            }
-          }
-        }
-      }
-      else {
-        console.log('unknown move direction');
-        res.statusCode = 400;
-      }
+    if (!!req.body.move && (req.body.move.match(/^(up|down|left|right)$/))) {
+      movePlayer(req.params.id, req.body.move);
     }
   }
   else {
@@ -501,6 +461,8 @@ app.post('/players\/?$', function(req, res) {
     "name": null, // FIXME: implement
     "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
     "y": Math.floor(Math.random() * cd.data.screen.height),
+    "xSpeed": 0,
+    "ySpeed": 0,
     "radius": cd.defaultRadius,
     "mass": cd.defaultMass,
     "state": cd.defaultState,
