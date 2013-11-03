@@ -120,6 +120,17 @@
         .attr("stroke-width", 1)
         .attr("fill", "none");
 
+        cd.d3leaderBoard = cd.svg.selectAll("rect.leaderboard")
+        .data(cd.data.leaderBoard)
+        .enter()
+        .append("rect")
+        .attr("x", 10)
+        .attr("y", function(d) { return (cd.data.screen["height"] - (d.index*10 + cd.data.screen["height"]/2)); })
+        .attr("width",10)
+        .attr("height",10)
+        .attr("fill",function(d) { return (d.color); })
+
+
     /*
     selectAll('path.link')
         .data(cd.data.links)
@@ -190,8 +201,23 @@
       //console.log('in updateFrame() at frame rate ' + cd.data.screen.frameRate);
       getGameData();
       
+      cd.d3leaderBoard = cd.svg.selectAll("rect.leaderboard")
+        .data(cd.data.leaderBoard)
+      
+      //FIXME: Better choice of where to draw the leader board. maybe its own svg?
+      cd.d3leaderBoard
+        .enter()
+        .append("rect")
+        .attr("x", 10)
+        .attr("y", function(d) { return (cd.data.screen.height - d.index*10 +50); })
+        .attr("width",10)
+        .attr("height",10)
+        .attr("fill",function(d) { return (d.color); })
+
+
       cd.d3links = cd.svg.selectAll("line.link")
         .data(cd.data.links);
+      //FIXME: Update draws over circles dont know why.
       cd.d3links
       .attr("line.link","update")
       .transition()

@@ -126,19 +126,31 @@ var updateFrame = function() {
   updateLinks();
   //updatePlayers();
   updateOrbs();
+  //FIXME: I dont think this needs to be updated every frame. It should do it anytime an orb is eaten by a player.
   updateLeaderBoard();
 };
 
 var updateLeaderBoard = function(){
 
-  // var playersCopy = cd.data.players;
-  // playersCopy.sort(sortBy("score"));
+  var playersCopy =[];
+  cd.data.players;
+  cd.data.leaderBoard = [];
+  //Because js passes vars by reference. KW if you have a better way of doing this im open to ideas.
+  for( i in cd.data.players){
+    playersCopy.push(cd.data.players[i]);
+  }
 
+  playersCopy.sort(sortBy("score"));
+  
+  //clear the old leaderboard data
+  
 
-  // for(i in playersCopy){
-  //   console.log(playersCopy[i].id +" : "+playersCopy[i].score)
+    for(i in playersCopy){
+      // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
 
-  // }
+      var newLeaderBoardItem  = { "index": i, "color":playersCopy[i].color};
+      cd.data.leaderBoard.push(newLeaderBoardItem);
+    }
   
 }
 function sortBy(prop){
