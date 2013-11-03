@@ -283,12 +283,11 @@
         .style("fill-opacity", 1e-6)
         .remove();
       cd.d3players.transition() // move any players that have moved in the data
-//        .duration(100/cd.data.screen.frameRate)
         .attr('cx', function(d) {
           return d.x;
         })
         .attr('cy', function(d) {
-            return d.y;
+          return d.y;
         })
         .attr('r', function(d) {
           return d.radius;
