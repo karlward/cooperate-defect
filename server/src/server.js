@@ -322,7 +322,7 @@ app.patch('/players/:id', function(req, res) {
         }
       }
       else if (req.body.move == 'right') {
-        if (cd.data.players[req.params.id].x < cd.data.screen.height) {
+        if (cd.data.players[req.params.id].x < cd.data.screen.width) {
           cd.data.players[req.params.id].x = cd.data.players[req.params.id].x + 10;
           
           for (l in cd.data.links){
@@ -339,10 +339,10 @@ app.patch('/players/:id', function(req, res) {
           
           for (l in cd.data.links){
             if (cd.data.links[l].source.id == req.params.id) {
-              cd.data.links[l].source.x  += cd.data.screen.width;
+              cd.data.links[l].source.x  = cd.data.screen.width;
             }
             if (cd.data.links[l].target.id == req.params.id) {
-              cd.data.links[l].target.x += cd.data.screen.width;
+              cd.data.links[l].target.x = cd.data.screen.width;
             }
           }
         }
