@@ -137,19 +137,20 @@ var updateFrame = function() {
 };
 
 var updatePlayers = function() {
+  // deceleration based on mass and current speed
   cd.data.players.forEach(function(element, index, array) {
     if (element.xSpeed > 0) {
-      element.xSpeed--; // slow yo roll dawg
+      element.xSpeed -= 2 + ((10 + element.xSpeed) / element.mass); // slow yo roll dawg
     }
     else if (element.xSpeed < 0) {
-      element.xSpeed++;  // slow yo negative roll
+      element.xSpeed += 2 + ((10 + element.xSpeed) / element.mass);  // slow yo negative roll
     }
     
     if (element.ySpeed > 0) {
-      element.ySpeed--;
+      element.ySpeed -= 2 + ((10 + element.xSpeed) / element.mass);
     }
     else if (element.ySpeed < 0) {
-      element.ySpeed++;
+      element.ySpeed += 2 + ((10 + element.xSpeed) / element.mass);
     }
   });
 };
@@ -192,7 +193,20 @@ var updateLinks = function(){
     checkForLinks();
 }
 var updateOrbs = function() {
-  for (i in cd.data.orbs) {
+  cd.data.orbs.forEach(function(element, index, array) {
+    element.x = element.x + element.xSpeed;
+    element.y = element.y + element.ySpeed;
+    if ((element.x >= cd.data.screen.width)
+      || (element.x <= 0)
+      || (element.y >= cd.data.screen.height)
+      || (element.y <= 0)) {
+      console.log('removing orb');
+      cd.data.orbs.splice(index); // remove it, no player captured this orb
+    }
+  });
+};
+  
+/*    //for (i in cd.data.orbs) {
     cd.data.orbs[i].x = cd.data.orbs[i].x + cd.data.orbs[i].xSpeed;
     cd.data.orbs[i].y = cd.data.orbs[i].y + cd.data.orbs[i].ySpeed;
     if ((cd.data.orbs[i].x >= cd.data.screen.width)
@@ -203,7 +217,7 @@ var updateOrbs = function() {
       cd.data.orbs.splice(i); // remove it, no player captured this orb
     }
   }
-};
+}; */
 
 //this updates game state
 setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
@@ -257,20 +271,30 @@ app.get('/players\/?$', function(req, res) {
 });
 
 var movePlayer = function(playerId, direction) {
+  // accleration based on mass and speed
   //console.log('in movePlayer for player ' + playerId + ' direction ' + direction);
   if (!!cd.data.players[playerId]) {
     if (direction === 'up') {
-      cd.data.players[playerId].ySpeed = -10;
+      if (Math.abs(cd.data.players[playerId].ySpeed) < 15) {
+        cd.data.players[playerId].ySpeed += -2 + (-1 * (10 + cd.data.players[playerId].ySpeed) / cd.data.players[playerId].mass);
+      }
     }
     else if (direction === 'down') {
-      cd.data.players[playerId].ySpeed = 10;
+      if (Math.abs(cd.data.players[playerId].ySpeed) < 15) {
+        cd.data.players[playerId].ySpeed += 2 + ((10 + cd.data.players[playerId].ySpeed) / cd.data.players[playerId].mass);
+      }
     }
     else if (direction === 'left') {
-      cd.data.players[playerId].xSpeed = -10;
+      if (Math.abs(cd.data.players[playerId].xSpeed) < 15) {
+        cd.data.players[playerId].xSpeed += -2 + (-1 * (10 + cd.data.players[playerId].xSpeed) / cd.data.players[playerId].mass);
+      }
     }
     else if (direction === 'right') {
-      cd.data.players[playerId].xSpeed = 10;
+      if (Math.abs(cd.data.players[playerId].xSpeed) < 15) {
+        cd.data.players[playerId].xSpeed += 2 + ((10 + cd.data.players[playerId].xSpeed) / cd.data.players[playerId].mass);
+      }
     }
+    
     var newX = cd.data.players[playerId].x + cd.data.players[playerId].xSpeed;
     if (newX < 0) {
       newX = 0;
