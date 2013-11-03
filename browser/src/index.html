@@ -124,8 +124,9 @@
         .data(cd.data.leaderBoard)
         .enter()
         .append("rect")
+        .attr("class","leaderboard")
         .attr("x", 10)
-        .attr("y", function(d) { return (cd.data.screen["height"] - (d.index*10 + cd.data.screen["height"]/2)); })
+        .attr("y", function(d) { return ((cd.data.screen.height - d.index*10)); })
         .attr("width",10)
         .attr("height",10)
         .attr("fill",function(d) { return (d.color); })
@@ -208,12 +209,25 @@
       cd.d3leaderBoard
         .enter()
         .append("rect")
+        .attr("class","leaderboard")
         .attr("x", 10)
-        .attr("y", function(d) { return (cd.data.screen.height - d.index*10 +50); })
+        .attr("y", function(d) { return ( (cd.data.screen.height - d.index*10 )); })
         .attr("width",10)
         .attr("height",10)
         .attr("fill",function(d) { return (d.color); })
 
+      // cd.d3leaderBoard
+      //   .attr("rect.leaderboard","update")
+      //   .transition()
+      //   .attr("x", 10)
+      //   .attr("y", function(d) { return (cd.data.screen.height - d.index*10 +cd.data.screen.height/2); })
+      //   .attr("width",10)
+      //   .attr("height",10)
+      //   .attr("fill",function(d) { return (d.color); })
+
+     cd.d3leaderBoard
+        .exit()
+        .remove() 
 
       cd.d3links = cd.svg.selectAll("line.link")
         .data(cd.data.links);
