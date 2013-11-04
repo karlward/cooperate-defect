@@ -30,7 +30,7 @@ cd.data =
     "frameRate": 10
   },
   "players": [
-
+/*
   {
     "id": 0,
     "name": "Surya",
@@ -79,9 +79,10 @@ cd.data =
     "currentRank": 3,
     "numberOfLinks": 0
   }
-
+*/
   ],
   "orbs": [
+/*
     {
       "id": 0,
       "x": 250,
@@ -90,6 +91,7 @@ cd.data =
       "ySpeed": 5,
       "radius": cd.defaultRadius,
     }
+*/
   ],
   "links": [
   ],
