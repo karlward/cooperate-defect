@@ -44,7 +44,8 @@ cd.data =
     "effect": "none",
     "color": "#ff0000",
     "score": 10,
-    "currentRank": 1
+    "currentRank": 1,
+    "numberOfLinks": 0
   },
   {
     "id": 1,
@@ -59,7 +60,8 @@ cd.data =
     "effect": "point",
     "color": "#00ff00",
     "score": 30,
-    "currentRank": 2
+    "currentRank": 2,
+    "numberOfLinks": 0
   },
   {
     "id": 2,
@@ -74,7 +76,8 @@ cd.data =
     "effect": "none",
     "color": "#0000ff",
     "score": 20,
-    "currentRank": 3
+    "currentRank": 3,
+    "numberOfLinks": 0
   }
   ],
   "orbs": [
@@ -121,6 +124,9 @@ cd.data =
   ],
   "leaderBoard":[
 
+  ],
+  "groups":[
+      // { "ids" :[ 0,0,0,0] }
   ]
 };
 
@@ -134,7 +140,72 @@ var updateFrame = function() {
   updateOrbs();
   //FIXME: I dont think this needs to be updated every frame. It should do it anytime an orb is eaten by a player.
   updateLeaderBoard();
+  updateChains();
 };
+
+var updateChains = function(){
+
+  cd.data.links.forEach(function(element,index,array){
+
+    if(cd.data.groups.length <= 0){
+
+      cd.data.groups.push( { "players" :[ element.source.id, element.target.id ] });     
+      // console.log("adding new group"); 
+    }
+    else{
+      cd.data.groups.forEach(function(groupElement,groupIndex, groupArray){
+        // console.log("Checking if: " + groupElement.players + " contains "+ element.source);
+        if(contains(groupElement.players, element.source.id)){
+          groupElement.players.push(element.target);
+          // console.log("element id : " +element.target + "  added to group"); 
+        }
+        else if(contains(groupElement.players, element.target.id)){
+          groupElement.players.push(element.source);
+          // console.log("element id : " +element.source + "  added to group");
+        }
+        else{
+
+          cd.data.groups.push({"players" :[ element.source.id, element.target.id ] }); 
+          // console.log("element not found in current group adding new group  ");
+        }
+      });      
+    }
+
+  });
+
+  if(cd.data.groups.length <= 0){
+  
+    cd.data.groups.forEach(function(groupElement,groupIndex, groupArray){ 
+      deduplicate(groupElement.players);
+    });
+
+  }
+  
+}
+
+var deduplicate = function(a){
+  
+  // for (var i = a.length; i >= 0 ; i--) {
+  //   for(var j =a.length; j>=0 ; j--){
+  //       if(a[i] == a[j] &&  i !== j){
+  //         a.splice(j,1);
+  //       }
+  //   }
+  // }
+
+
+}
+
+var contains  = function(a, obj) {
+    
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] == obj) {
+            return true;
+        }
+    }
+    // console.log(a+ " doesnt contain "+ obj);
+    return false;
+}
 
 var updatePlayers = function() {
   // deceleration based on mass and current speed
@@ -414,7 +485,8 @@ var addLink = function(sourceId, targetId){
         },
         "value" : 1
       };
-
+      cd.data.players[sourceId].numberOfLinks++; 
+      cd.data.players[targetId].numberOfLinks++;
       console.log("Added new link");
       cd.data.links.push(newLink);
   }
@@ -429,12 +501,16 @@ var removeLink = function(id){
     if(cd.data.links[i].source.id == id){
         //remove link object
         console.log("Removing source link at index : " + i );
+        cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
+        cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
         cd.data.links.splice(i,1);
     } 
 
     //if id is a link target remove
     if(cd.data.links[i].target.id == id){
       console.log("Removing target link at index : " + i );
+      cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
+      cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
       cd.data.links.splice(i,1);
     }
 
@@ -493,7 +569,8 @@ app.post('/players\/?$', function(req, res) {
     "effect": "new",
     "color": randomRGB(),
     "score": 0,
-    "currentRank":cd.data.players.length
+    "currentRank":cd.data.players.length,
+    "numberOfLinks": 0,
   };
   console.log("New Player added !");
   cd.data.players.push(newPlayer);
@@ -549,3 +626,6 @@ var createOrb = function() {
   orb.ySpeed = Math.ceil(Math.random() * 10) * flipCoin();
   cd.data.orbs.push(orb);
 }
+
+
+
