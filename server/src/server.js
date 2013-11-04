@@ -104,60 +104,51 @@ cd.data =
 };
 
 var updateFrame = function() {
-  if (cd.data.orbs.length === 0) {
+  //if ((cd.data.orbs.length < 5) && (cd.data.orbs.length < cd.data.players.length - 1)) {
+  if (cd.data.orbs.length < 1) {
     createOrb();
   }
 
   updatePlayers();
   updateLinks();
   updateOrbs();
-  //FIXME: I dont think this needs to be updated every frame. It should do it anytime an orb is eaten by a player.
-  updateLeaderBoard();
-  updateChains();
+  updateGroups();
 };
 
-var updateChains = function(){
-
-  cd.data.links.forEach(function(element,index,array){
-
+var updateGroups = function() {
+  cd.data.links.forEach(function(link, linkIndex, links) {
     if(cd.data.groups.length <= 0){
-
-      cd.data.groups.push( { "players" :[ element.source.id, element.target.id ] });     
+      cd.data.groups.push({"players": [link.source.id, link.target.id]});     
       // console.log("adding new group"); 
     }
-    else{
-      cd.data.groups.forEach(function(groupElement,groupIndex, groupArray){
-        // console.log("Checking if: " + groupElement.players + " contains "+ element.source);
-        if(contains(groupElement.players, element.source.id)){
-          groupElement.players.push(element.target);
-          // console.log("element id : " +element.target + "  added to group"); 
+    else {
+      cd.data.groups.forEach(function(group, groupIndex, groups) {
+        // console.log("Checking if: " + group.players + " contains "+ link.source);
+        if (contains(group.players, link.source.id)){
+          group.players.push(link.target.id);
+          //console.log("link id: " + link.target.id + " added to group as target"); 
         }
-        else if(contains(groupElement.players, element.target.id)){
-          groupElement.players.push(element.source);
-          // console.log("element id : " +element.source + "  added to group");
+        else if (contains(group.players, link.target.id)) {
+          group.players.push(link.source.id);
+          //console.log("link id: " + link.source.id + "  added to group as source");
         }
-        else{
-
-          cd.data.groups.push({"players" :[ element.source.id, element.target.id ] }); 
-          // console.log("element not found in current group adding new group  ");
+        else {
+          groups.push({"players": [link.source.id, link.target.id]}); 
+          //console.log("link not found in current group adding new group");
         }
+        group.players = deduplicate(group.players);
       });      
     }
-
   });
-
-  if(cd.data.groups.length <= 0){
-  
-    cd.data.groups.forEach(function(groupElement,groupIndex, groupArray){ 
-      deduplicate(groupElement.players);
-    });
-
-  }
-  
 }
 
-var deduplicate = function(a){
-  
+var deduplicate = function(array){
+  var seen = new Object();
+  for (i in array) {
+    seen[array[i]]++;
+  }
+  return Object.keys(seen);
+
   // for (var i = a.length; i >= 0 ; i--) {
   //   for(var j =a.length; j>=0 ; j--){
   //       if(a[i] == a[j] &&  i !== j){
@@ -165,19 +156,16 @@ var deduplicate = function(a){
   //       }
   //   }
   // }
-
-
 }
 
-var contains  = function(a, obj) {
-    
-    for (var i = 0; i < a.length; i++) {
-        if (a[i] == obj) {
-            return true;
-        }
+var contains = function(a, obj) {
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] == obj) {
+      return true;
     }
-    // console.log(a+ " doesnt contain "+ obj);
-    return false;
+  }
+  // console.log(a+ " doesnt contain "+ obj);
+  return false;
 }
 
 var updatePlayers = function() {
@@ -217,29 +205,25 @@ var updatePlayers = function() {
   });
 };
 
-var updateLeaderBoard = function(){
-
+var updateLeaderBoard = function() {
   var playersCopy =[];
   cd.data.players;
   cd.data.leaderBoard = [];
   //Because js passes vars by reference. KW if you have a better way of doing this im open to ideas.
-  for( i in cd.data.players){
+  for (i in cd.data.players) {
     playersCopy.push(cd.data.players[i]);
   }
 
   playersCopy.sort(sortBy("score"));
   
   //clear the old leaderboard data
-  
-
-    for(i in playersCopy){
-      // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
-
-      var newLeaderBoardItem  = { "index": i, "color":playersCopy[i].color};
-      cd.data.leaderBoard.push(newLeaderBoardItem);
-    }
-  
+  for(i in playersCopy) {
+    // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
+    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color};
+    cd.data.leaderBoard.push(newLeaderBoardItem);
+  }
 }
+
 function sortBy(prop){
    return function(a,b){
       if( a[prop] > b[prop]){
@@ -262,29 +246,37 @@ var updateLinks = function(){
 }
 
 var updateOrbs = function() {
-  cd.data.orbs.forEach(function(orb, index, array) {
+  cd.data.orbs.forEach(function(orb, orbIndex, orbs) {
     orb.x = orb.x + orb.xSpeed;
     orb.y = orb.y + orb.ySpeed;
     
-    cd.data.players.forEach(function(player, index2, array2) {
-      if (!!cd.data.orbs[index]) {
+    cd.data.players.forEach(function(player, playerIndex, players) {
+      if (!!orbs[orbIndex]) {
         var dist = findDistance(orb, player);
         if (dist >= 0) {
           console.log('player ' + player.id + ' captured orb at distance ' + dist);
-          cd.data.orbs.splice(index);
+          orbs.splice(orbIndex);
           player.mass += 2;
           player.radius += 2;
+          cd.data.groups.forEach(function(group, groupIndex, groups) {
+            if (contains(group, player)) {
+              console.log('orb capture via group for player ' + player.id);
+              player.mass += 2;
+              player.radius += 20;
+            }
+          });
+          updateLeaderBoard();
         }
       }
     });
     
-    if (!!cd.data.orbs[index]) {
+    if (!!orbs[orbIndex]) {
       if ((orb.x >= cd.data.screen.width)
         || (orb.x <= 0)
         || (orb.y >= cd.data.screen.height)
         || (orb.y <= 0)) {
         console.log('removing orb');
-        cd.data.orbs.splice(index); // remove it, no player captured this orb
+        orbs.splice(orbIndex); // remove it, no player captured this orb
       }
     }
   });
