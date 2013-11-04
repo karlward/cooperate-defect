@@ -95,11 +95,8 @@ cd.data =
   "links": [
   ],
   "leaderBoard":[
-
-
   ],
   "groups":[
-      // { "ids" :[ 0,0,0,0] 
   ]
 };
 
@@ -148,14 +145,6 @@ var deduplicate = function(array){
     seen[array[i]]++;
   }
   return Object.keys(seen);
-
-  // for (var i = a.length; i >= 0 ; i--) {
-  //   for(var j =a.length; j>=0 ; j--){
-  //       if(a[i] == a[j] &&  i !== j){
-  //         a.splice(j,1);
-  //       }
-  //   }
-  // }
 }
 
 var contains = function(a, obj) {
@@ -224,25 +213,26 @@ var updateLeaderBoard = function() {
   }
 }
 
-function sortBy(prop){
-   return function(a,b){
-      if( a[prop] > b[prop]){
-          return 1;
-      }else if( a[prop] < b[prop] ){
-          return -1;
-      }
-      return 0;
-   }
+function sortBy(prop) {
+  return function(a,b) {
+    if (a[prop] > b[prop]){
+      return 1;
+    }
+    else if (a[prop] < b[prop]){
+      return -1;
+    }
+    return 0;
+  }
 }
 
 var updateLinks = function(){
-    cd.data.links.forEach(function(element, index, array) {
-      element.source.x = cd.data.players[element.source.id].x;
-      element.source.y = cd.data.players[element.source.id].y;
-      element.target.x = cd.data.players[element.target.id].x;
-      element.target.y = cd.data.players[element.target.id].y;
-    });
-    checkForLinks();
+  cd.data.links.forEach(function(element, index, array) {
+    element.source.x = cd.data.players[element.source.id].x;
+    element.source.y = cd.data.players[element.source.id].y;
+    element.target.x = cd.data.players[element.target.id].x;
+    element.target.y = cd.data.players[element.target.id].y;
+  });
+  checkForLinks();
 }
 
 var updateOrbs = function() {
@@ -264,7 +254,7 @@ var updateOrbs = function() {
                 if (group.players[index] !== player.id) {
                   console.log('orb capture via group for player ' + group.players[index]);
                   players[group.players[index]].mass += 2;
-                  players[group.players[index]].radius += 20;
+                  players[group.players[index]].radius += 2;
                 }
               }
             }
@@ -285,19 +275,6 @@ var updateOrbs = function() {
     }
   });
 };
-  
-/*    //for (i in cd.data.orbs) {
-    cd.data.orbs[i].x = cd.data.orbs[i].x + cd.data.orbs[i].xSpeed;
-    cd.data.orbs[i].y = cd.data.orbs[i].y + cd.data.orbs[i].ySpeed;
-    if ((cd.data.orbs[i].x >= cd.data.screen.width)
-        || (cd.data.orbs[i].x <= 0)
-        || (cd.data.orbs[i].y >= cd.data.screen.height)
-        || (cd.data.orbs[i].y <= 0)) {
-      console.log("removing orb");
-      cd.data.orbs.splice(i); // remove it, no player captured this orb
-    }
-  }
-}; */
 
 //this updates game state
 setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
@@ -425,32 +402,27 @@ var findDistance = function(obj1, obj2) {
   }
 };
 
-var checkForLinks = function(){
-
-    // console.log("No. of Player : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
-    for( i in cd.data.players){
-      for(j in cd.data.players){
-        if(cd.data.players[i] !== null && cd.data.players[j] !==null){
-            
-          // console.log(cd.data.players[i].id +" : "+cd.data.players[j].id);
-          
-          if(cd.data.players[i].id !== cd.data.players[j].id){
-            if ((findDistance(cd.data.players[i], cd.data.players[j]) >= 0) 
-                && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
-              addLink(cd.data.players[i].id, cd.data.players[j].id);
-            
-            }
-            else{
-              // console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
-            }
-          }  
-        }
-        else{
-          console.log("Some players id is null");
-        }
-        
+var checkForLinks = function() {
+  // console.log("No. of Player : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
+  for (i in cd.data.players) {
+    for (j in cd.data.players) {
+      if (!!cd.data.players[i] && !!cd.data.players[j]) {
+        // console.log(cd.data.players[i].id +" : "+cd.data.players[j].id);
+        if (cd.data.players[i].id !== cd.data.players[j].id){
+          if ((findDistance(cd.data.players[i], cd.data.players[j]) >= 0) 
+              && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
+            addLink(cd.data.players[i].id, cd.data.players[j].id);
+          }
+          else {
+            // console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
+          }
+        }  
       }
-    }  
+      else {
+        console.log("Some players id is null");
+      }
+    }
+  }  
 }
 
 var addLink = function(sourceId, targetId){
