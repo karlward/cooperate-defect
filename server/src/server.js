@@ -21,7 +21,7 @@ cd.data =
 {
   "game": {
     "id": 1,
-    "durationMS": 18000,
+    "durationMS": 180000,
     "elapsedMS": 130765,
     "running":true
   },
@@ -106,14 +106,20 @@ cd.data =
 
 var updateFrame = function() {
   //if ((cd.data.orbs.length < 5) && (cd.data.orbs.length < cd.data.players.length - 1)) {
-  if (cd.data.orbs.length < 1) {
-    createOrb();
-  }
+  if(cd.data.game.running ===true){
+    if (cd.data.orbs.length < 1) {
+      createOrb();
+    }
 
-  updatePlayers();
-  updateLinks();
-  updateOrbs();
-  updateGroups();
+    updatePlayers();
+    updateLinks();
+    updateOrbs();
+    updateGroups();
+  }
+  else{
+    console.log("game over!");
+  }
+  
 };
 
 var updateGroups = function() {
