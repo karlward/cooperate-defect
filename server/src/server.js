@@ -31,6 +31,7 @@ cd.data =
     "frameRate": 10
   },
   "players": [
+
   {
     "id": 0,
     "name": "Surya",
@@ -79,9 +80,9 @@ cd.data =
     "currentRank": 3,
     "numberOfLinks": 0
   }
+
   ],
   "orbs": [
-
     {
       "id": 0,
       "x": 250,
@@ -90,43 +91,15 @@ cd.data =
       "ySpeed": 5,
       "radius": cd.defaultRadius,
     }
-
   ],
   "links": [
-    /*
-    {     
-      "source" :{ 
-        "id":0,
-        "x": 120,
-        "y": 185,
-      },
-      "target" :{ 
-        "id":1,
-        "x": 402,
-        "y": 300,
-      },
-      "value" : 1
-    },
-    {
-      "source" :{ 
-        "id":1,
-        "x": 120,
-        "y": 185,
-      },
-      "target" :{ 
-        "id":2,
-        "x": 20,
-        "y": 40,
-      },
-      "value" : 1
-    }
-    */
   ],
   "leaderBoard":[
 
+
   ],
   "groups":[
-      // { "ids" :[ 0,0,0,0] }
+      // { "ids" :[ 0,0,0,0] 
   ]
 };
 
@@ -135,8 +108,8 @@ var updateFrame = function() {
     createOrb();
   }
 
-  updateLinks();
   updatePlayers();
+  updateLinks();
   updateOrbs();
   //FIXME: I dont think this needs to be updated every frame. It should do it anytime an orb is eaten by a player.
   updateLeaderBoard();
@@ -208,20 +181,38 @@ var contains  = function(a, obj) {
 }
 
 var updatePlayers = function() {
-  // deceleration based on mass and current speed
-  cd.data.players.forEach(function(element, index, array) {
+  cd.data.players.forEach(function (element, index, array) {
+    var newX = element.x + element.xSpeed;
+    if (newX < 0) {
+      newX = 0;
+    }
+    else if (newX > cd.data.screen.width) {
+      newX = cd.data.screen.width;
+    }
+    element.x = newX;
+
+    var newY = element.y + element.ySpeed;
+    if (newY < 0) {
+      newY = 0;
+    }
+    else if (newY > cd.data.screen.height) {
+      newY = cd.data.screen.height;
+    }
+    element.y = newY;
+    
+    // deceleration based on mass and current speed
     if (element.xSpeed > 0) {
-      element.xSpeed -= 2 + ((10 + element.xSpeed) / element.mass); // slow yo roll dawg
+      element.xSpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass); // slow yo roll dawg
     }
     else if (element.xSpeed < 0) {
-      element.xSpeed += 2 + ((10 + element.xSpeed) / element.mass);  // slow yo negative roll
+      element.xSpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);  // slow yo negative roll
     }
     
     if (element.ySpeed > 0) {
-      element.ySpeed -= 2 + ((10 + element.xSpeed) / element.mass);
+      element.ySpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
     }
     else if (element.ySpeed < 0) {
-      element.ySpeed += 2 + ((10 + element.xSpeed) / element.mass);
+      element.ySpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
     }
   });
 };
@@ -261,18 +252,40 @@ function sortBy(prop){
 }
 
 var updateLinks = function(){
+    cd.data.links.forEach(function(element, index, array) {
+      element.source.x = cd.data.players[element.source.id].x;
+      element.source.y = cd.data.players[element.source.id].y;
+      element.target.x = cd.data.players[element.target.id].x;
+      element.target.y = cd.data.players[element.target.id].y;
+    });
     checkForLinks();
 }
+
 var updateOrbs = function() {
-  cd.data.orbs.forEach(function(element, index, array) {
-    element.x = element.x + element.xSpeed;
-    element.y = element.y + element.ySpeed;
-    if ((element.x >= cd.data.screen.width)
-      || (element.x <= 0)
-      || (element.y >= cd.data.screen.height)
-      || (element.y <= 0)) {
-      console.log('removing orb');
-      cd.data.orbs.splice(index); // remove it, no player captured this orb
+  cd.data.orbs.forEach(function(orb, index, array) {
+    orb.x = orb.x + orb.xSpeed;
+    orb.y = orb.y + orb.ySpeed;
+    
+    cd.data.players.forEach(function(player, index2, array2) {
+      if (!!cd.data.orbs[index]) {
+        var dist = findDistance(orb, player);
+        if (dist >= 0) {
+          console.log('player ' + player.id + ' captured orb at distance ' + dist);
+          cd.data.orbs.splice(index);
+          player.mass += 2;
+          player.radius += 2;
+        }
+      }
+    });
+    
+    if (!!cd.data.orbs[index]) {
+      if ((orb.x >= cd.data.screen.width)
+        || (orb.x <= 0)
+        || (orb.y >= cd.data.screen.height)
+        || (orb.y <= 0)) {
+        console.log('removing orb');
+        cd.data.orbs.splice(index); // remove it, no player captured this orb
+      }
     }
   });
 };
@@ -345,52 +358,27 @@ var movePlayer = function(playerId, direction) {
   // accleration based on mass and speed
   //console.log('in movePlayer for player ' + playerId + ' direction ' + direction);
   if (!!cd.data.players[playerId]) {
+    var element = cd.data.players[playerId];
     if (direction === 'up') {
-      if (Math.abs(cd.data.players[playerId].ySpeed) < 15) {
-        cd.data.players[playerId].ySpeed += -2 + (-1 * (10 + cd.data.players[playerId].ySpeed) / cd.data.players[playerId].mass);
+      if (Math.abs(element.ySpeed) < 15) {
+        element.ySpeed += cd.data.screen.frameRate/-5 + (-1 * (cd.data.screen.frameRate + element.ySpeed) / element.mass);
       }
     }
     else if (direction === 'down') {
-      if (Math.abs(cd.data.players[playerId].ySpeed) < 15) {
-        cd.data.players[playerId].ySpeed += 2 + ((10 + cd.data.players[playerId].ySpeed) / cd.data.players[playerId].mass);
+      if (Math.abs(element.ySpeed) < 15) {
+        element.ySpeed += cd.data.screen.frameRate/5 + ((cd.data.screen.frameRate + element.ySpeed) / element.mass);
       }
     }
     else if (direction === 'left') {
-      if (Math.abs(cd.data.players[playerId].xSpeed) < 15) {
-        cd.data.players[playerId].xSpeed += -2 + (-1 * (10 + cd.data.players[playerId].xSpeed) / cd.data.players[playerId].mass);
+      if (Math.abs(element.xSpeed) < 15) {
+        element.xSpeed += cd.data.screen.frameRate/-5 + (-1 * (cd.data.screen.frameRate + element.xSpeed) / element.mass);
       }
     }
     else if (direction === 'right') {
-      if (Math.abs(cd.data.players[playerId].xSpeed) < 15) {
-        cd.data.players[playerId].xSpeed += 2 + ((10 + cd.data.players[playerId].xSpeed) / cd.data.players[playerId].mass);
+      if (Math.abs(element.xSpeed) < 15) {
+        element.xSpeed += cd.data.screen.frameRate/5 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
       }
     }
-    
-    var newX = cd.data.players[playerId].x + cd.data.players[playerId].xSpeed;
-    if (newX < 0) {
-      newX = 0;
-    }
-    else if (newX > cd.data.screen.width) {
-      newX = cd.data.screen.width;
-    }
-    cd.data.players[playerId].x = newX;
-
-    var newY = cd.data.players[playerId].y + cd.data.players[playerId].ySpeed;
-    if (newY < 0) {
-      newY = 0;
-    }
-    else if (newY > cd.data.screen.height) {
-      newY = cd.data.screen.height;
-    }
-    cd.data.players[playerId].y = newY;
-    
-    // update links here
-    cd.data.links.forEach(function(element, index, array) {
-      element.source.x = cd.data.players[element.source.id].x;
-      element.source.y = cd.data.players[element.source.id].y;
-      element.target.x = cd.data.players[element.target.id].x;
-      element.target.y = cd.data.players[element.target.id].y;
-    });
   }
 };
 
@@ -428,7 +416,7 @@ app.patch('/players/:id', function(req, res) {
 
 // find distance between two objects, return distance in pixels
 // if return value is 0, objects are touching
-// if return value is negative, objects are touching and overlapping
+// if return value is positive, objects are touching and overlapping
 var findDistance = function(obj1, obj2) {
   if ((obj1 !== null) && (obj2 !== null)) {
     var dx = obj1.x - obj2.x;
@@ -622,8 +610,8 @@ var createOrb = function() {
   orb.y = Math.floor(Math.random() * cd.data.screen.height);
   orb.radius = cd.defaultRadius;
   orb.id = cd.data.orbs.length;
-  orb.xSpeed = Math.ceil(Math.random() * 10) * flipCoin();
-  orb.ySpeed = Math.ceil(Math.random() * 10) * flipCoin();
+  orb.xSpeed = Math.ceil(Math.random() * cd.data.screen.frameRate) * flipCoin();
+  orb.ySpeed = Math.ceil(Math.random() * cd.data.screen.frameRate) * flipCoin();
   cd.data.orbs.push(orb);
 }
 
