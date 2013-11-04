@@ -206,12 +206,12 @@ var updateLeaderBoard = function() {
     playersCopy.push(cd.data.players[i]);
   }
 
-  playersCopy.sort(sortBy("score"));
+  playersCopy.sort(sortBy("mass"));
   
   //clear the old leaderboard data
   for(i in playersCopy) {
     // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
-    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color};
+    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id};
     cd.data.leaderBoard.push(newLeaderBoardItem);
   }
 }
