@@ -285,10 +285,11 @@ var gameOver = function(){
   cd.data.links = [];
   cd.data.orbs = [];
   cd.data.groupd = [];
+  cd.data.game.running= false;
 }
 //this updates game state
 setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
-setTimeout(gameOver,cd.data.game)["durationMS"];
+setTimeout(gameOver,cd.data.game["durationMS"]);
 
 
 app.get('/orbs/:id', function (req, res) {
