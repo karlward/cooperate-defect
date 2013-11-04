@@ -21,14 +21,15 @@ cd.data =
 {
   "game": {
     "id": 1,
-    "durationMS": 180000,
-    "elapsedMS": 130765
+    "durationMS": 18000,
+    "elapsedMS": 130765,
+    "running":true
   },
   "screen": {
     "width": 800,
     "height": 600,
     "scoreWidth": 200,
-    "scoreHeight": 100,
+    "scoreHeight": 500,
     "frameRate": 10
   },  
   "players": [
@@ -278,9 +279,17 @@ var updateOrbs = function() {
     }
   });
 };
-
+var gameOver = function(){
+  console.log("Game time over!");
+  cd.data.playesrs =[];
+  cd.data.links = [];
+  cd.data.orbs = [];
+  cd.data.groupd = [];
+}
 //this updates game state
 setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
+setTimeout(gameOver,cd.data.game)["durationMS"];
+
 
 app.get('/orbs/:id', function (req, res) {
   if (!!(cd.data.orbs[req.params.id])) {
