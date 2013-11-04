@@ -11,7 +11,8 @@
     var cd = new Object(); // for cooperate-defect package globals
     //cd.playerId = 0; // FIXME: lookup instead of hardcoding
     cd.gameId = 1; // FIXME: lookup instead of hardcoding
-    cd.server = 'drake.itp.tsoa.nyu.edu:8000';
+    //  cd.server = 'drake.itp.tsoa.nyu.edu:8000';
+    cd.server = 'localhost:8000';
     
     // when DOM is ready, pull in state from game server, call initScreen
     $(document).ready(function() {
@@ -108,6 +109,14 @@
         .attr('width', cd.data.screen["width"])
         .attr('height', cd.data.screen["height"]);
 
+      cd.scoreSvg = d3.select('body')
+                      .append('svg:svg')
+                      .attr('width', cd.data.screen["scoreWidth"])
+                      .attr('height', cd.data.screen["scoreHeight"])
+                      .attr('x', cd.data.screen["width"])
+                      .attr('y', 0);
+      
+
       cd.d3links = cd.svg.selectAll("line.link")
         .data(cd.data.links)
         .enter()
@@ -120,7 +129,19 @@
         .attr("stroke", "blue")
         .attr("stroke-width", 1)
         .attr("fill", "none");
+      
 
+      cd.d3leaderBoard = cd.scoreSvg.selectAll("rect.leaderboard")
+              .data(cd.data.leaderBoard)
+              .enter()
+              .append("rect")
+              .attr("class","leaderboard")
+              .attr("x", 10)
+              .attr("y", function(d) { return (d.index*10); })
+              .attr("width",10)
+              .attr("height",10)
+              .attr("fill",function(d) { return (d.color); })
+/*
         cd.d3leaderBoard = cd.svg.selectAll("rect.leaderboard")
         .data(cd.data.leaderBoard)
         .enter()
@@ -131,7 +152,7 @@
         .attr("width",10)
         .attr("height",10)
         .attr("fill",function(d) { return (d.color); })
-
+*/
 
     /*
     selectAll('path.link')
@@ -203,7 +224,7 @@
       //console.log('in updateFrame() at frame rate ' + cd.data.screen.frameRate);
       getGameData();
       
-      cd.d3leaderBoard = cd.svg.selectAll("rect.leaderboard")
+      cd.d3leaderBoard = cd.scoreSvg  .selectAll("rect.leaderboard")
         .data(cd.data.leaderBoard)
       
       //FIXME: Better choice of where to draw the leader board. maybe its own svg?
@@ -212,19 +233,19 @@
         .append("rect")
         .attr("class","leaderboard")
         .attr("x", 10)
-        .attr("y", function(d) { return ( (cd.data.screen.height - d.index*10 )); })
+        .attr("y", function(d) { return (  d.index*10 ); })
         .attr("width",10)
         .attr("height",10)
         .attr("fill",function(d) { return (d.color); })
 
-      // cd.d3leaderBoard
-      //   .attr("rect.leaderboard","update")
-      //   .transition()
-      //   .attr("x", 10)
-      //   .attr("y", function(d) { return (cd.data.screen.height - d.index*10 +cd.data.screen.height/2); })
-      //   .attr("width",10)
-      //   .attr("height",10)
-      //   .attr("fill",function(d) { return (d.color); })
+      cd.d3leaderBoard
+        .attr("rect.leaderboard","update")
+        .transition()
+        .attr("x", 10)
+        .attr("y", function(d) { return ( d.index*10 ); })
+        .attr("width",10)
+        .attr("height",10)
+        .attr("fill",function(d) { return (d.color); })
 
      cd.d3leaderBoard
         .exit()

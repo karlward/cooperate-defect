@@ -27,8 +27,10 @@ cd.data =
   "screen": {
     "width": 800,
     "height": 600,
+    "scoreWidth": 200,
+    "scoreHeight": 100,
     "frameRate": 10
-  },
+  },  
   "players": [
 /*
   {
@@ -451,6 +453,8 @@ var addLink = function(sourceId, targetId){
 
 var removeLink = function(id){
   var i = cd.data.links.length;
+
+  //Remove from links
   console.log("Checking for links to remove with id :" + id );
   while(i--){
       console.log("Checking index :" + i);
@@ -472,6 +476,16 @@ var removeLink = function(id){
     }
 
   }
+  //remove from groups
+  cd.data.groups.forEach(function(element,index,array){
+    if(contains(element.players,id)){
+      console.log("Removing player with id :" + id + "from group"+ element.players);
+      cd.data.groups.splice(index,1);
+
+    }
+
+  });
+
   console.log("Done Checking");
 }
 
