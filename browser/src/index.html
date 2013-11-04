@@ -283,6 +283,11 @@
             .attr("font-family", "sans-serif")
             .attr("font-size", "10px")
             .attr("fill", "black");        
+        
+        cd.d3leaderBoardText
+          .exit()
+          .remove()
+
       }    
     var updatePlayer   = function(){
       cd.d3players = cd.svg.selectAll("circle.player").data(cd.data.players);
@@ -414,11 +419,11 @@
             .enter()
             .append('text')
             .attr("class","playerID")
-            .attr("x",30)
-            .attr("y",function(d){return (d.index*20 +20 );})
+            .attr("x",cd.data.game.scoreWidth/2)
+            .attr("y",cd.data.game.scoreHeight/2)
             .attr("font-family", "sans-serif")
-            .attr("font-size", "8px")
-            .attr("fill", "black");        
+            .attr("font-size", "12px")
+            .attr("fill", "red");        
     }
     // actually move elements to match game state
     var updateFrame = function() {
@@ -433,7 +438,8 @@
         updateOrbs();
       }
       else if(cd.data.game.running === false  ){
-
+        gameOver();
+        console.log("Game Over");
       }
 
 
