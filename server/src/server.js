@@ -259,10 +259,14 @@ var updateOrbs = function() {
           player.mass += 2;
           player.radius += 2;
           cd.data.groups.forEach(function(group, groupIndex, groups) {
-            if (contains(group, player)) {
-              console.log('orb capture via group for player ' + player.id);
-              player.mass += 2;
-              player.radius += 20;
+            if (contains(group.players, player.id)) {
+              for (var index in group.players) { // index of array, not id of player
+                if (group.players[index] !== player.id) {
+                  console.log('orb capture via group for player ' + group.players[index]);
+                  players[group.players[index]].mass += 2;
+                  players[group.players[index]].radius += 20;
+                }
+              }
             }
           });
           updateLeaderBoard();
