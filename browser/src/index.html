@@ -16,7 +16,7 @@
     // when DOM is ready, pull in state from game server, call initScreen
     $(document).ready(function() {
       //console.log('in getGame()');
-      d3.json('http://' + cd.server + 'games/' + cd.gameId, function(err, json) {
+      d3.json('http://' + cd.server + '/games/' + cd.gameId, function(err, json) {
         if (err) {
           return console.warn(err);
         }
