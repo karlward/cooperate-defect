@@ -4,7 +4,6 @@
   "author": "Karl Ward <karl.ward@nyu.edu>",
   "description": "Cooperate/Defect network game server",
   "dependencies": {
-    "socket.io": "*",
     "express": "3.x"
   }
 }
