@@ -11,11 +11,12 @@
     var cd = new Object(); // for cooperate-defect package globals
     //cd.playerId = 0; // FIXME: lookup instead of hardcoding
     cd.gameId = 1; // FIXME: lookup instead of hardcoding
+    cd.server = 'drake.itp.tsoa.nyu.edu:8000';
     
     // when DOM is ready, pull in state from game server, call initScreen
     $(document).ready(function() {
       //console.log('in getGame()');
-      d3.json('http://drake.itp.tsoa.nyu.edu:8000/games/' + cd.gameId, function(err, json) {
+      d3.json('http://' + cd.server + 'games/' + cd.gameId, function(err, json) {
         if (err) {
           return console.warn(err);
         }
@@ -27,7 +28,7 @@
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },*/
-          url: 'http://localhost:8000/players/',
+          url: 'http://' + cd.server + '/players/',
           type: 'POST',
           success: function(postData) {
             //console.log("POST succeeded for new player " + postData.id);
@@ -62,7 +63,7 @@
               'Accept': 'application/json',
               'Content-Type': 'application/json'
             },
-            url: 'http://localhost:8000/players/' + cd.playerId,
+            url: 'http://' + cd.server + '/players/' + cd.playerId,
             type: 'PATCH',
             data: JSON.stringify(data),
             success: function() {
@@ -189,7 +190,7 @@
     // get fresh state from game server
     var getGameData = function() {
       //console.log('in getGameData()');
-      d3.json('http://localhost:8000/games/' + cd.gameId, function(err, json) {
+      d3.json('http://' + cd.server + '/games/' + cd.gameId, function(err, json) {
         if (err) {
           return console.warn(err);
         }
