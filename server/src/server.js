@@ -2,6 +2,7 @@ var express = require("express");
 var app = express();
 var http = require('http');
 var server = http.createServer(app);
+var url = require('url');
 
 // configure Express
 app.use(express.bodyParser());
@@ -15,6 +16,7 @@ cd.defaultRadius = 10;
 cd.defaultMass = 10;
 cd.defaultMinLinkDist = 10;
 cd.defaultState = "cooperate";
+var currentTime = 0;
 
 // FIXME: for now, load a game in code
 cd.data = 
@@ -22,7 +24,7 @@ cd.data =
   "game": {
     "id": 1,
     "durationMS": 180000,
-    "elapsedMS": 130765,
+    "elapsedMS": 0,
     "running":true
   },
   "screen": {
@@ -218,7 +220,7 @@ var updateLeaderBoard = function() {
   //clear the old leaderboard data
   for(i in playersCopy) {
     // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
-    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id};
+    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id, "name": playersCopy[i].name};
     cd.data.leaderBoard.push(newLeaderBoardItem);
   }
 }
@@ -294,8 +296,15 @@ var gameOver = function(){
   cd.data.game.running= false;
 }
 //this updates game state
+var updateCountdown = function(){
+currentTime += 1000;
+cd.data.game["elapsedMS"] = "10";
+// console.logtypeof(cd.data.game["elapsedMS"]) );
+}
 setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
 setTimeout(gameOver,cd.data.game["durationMS"]);
+setInterval(updateCountdown,1000)
+  
 
 
 app.get('/orbs/:id', function (req, res) {
@@ -542,10 +551,11 @@ var randomRGB = function() {
 
 // create a new player
 app.post('/players\/?$', function(req, res) {
+ 
   console.log('in post for new player');
   var newPlayer = {
     "id": cd.data.players.length,
-    "name": null, // FIXME: implement
+    "name": userName, // FIXME: implement
     "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
     "y": Math.floor(Math.random() * cd.data.screen.height),
     "xSpeed": 0,
@@ -569,7 +579,9 @@ app.post('/players\/?$', function(req, res) {
 
 // serve index to browsers
 app.get('/', function (req, res) {  
-  res.sendfile(__dirname + '/index.html');
+  // res.sendfile(__dirname + '/index.html');
+  res.sendfile(__dirname + '/CoopDef_Splash.html');
+
 });
 
 app.get('/games/:id', function(req, res) {
@@ -591,6 +603,17 @@ app.get('/games', function(req, res) {
   console.log('request for /games');
   // FIXME: error handling
 });
+var userName= null;
+app.get('/form_action.asp', function(req, res) {
+ // res.writeHead(200, {"Content-Type":"text/plain"});
+
+ var params = url.parse(req.url,true).query;
+ userName= params["id"];
+console.log(params);
+res.sendfile(__dirname + '/index.html');
+
+});
+ 
 
 var flipCoin = function() {
   if (Math.random() < 0.5) {

@@ -14,6 +14,7 @@
     //  cd.server = 'drake.itp.tsoa.nyu.edu:8000';
     cd.server = 'localhost:8000';
     
+    var elapsedTimeString = "0";
     // when DOM is ready, pull in state from game server, call initScreen
     $(document).ready(function() {
       //console.log('in getGame()');
@@ -84,26 +85,6 @@
       .y(function(d) { return d.target; })
       .interpolate("basis");
 
-
-    
-    // var tick = function() {
-    // path.attr("d", function(d) {
-    //     var dx = d.target.x – d.source.x,
-    //         dy = d.target.y – d.source.y,
-    //         dr = Math.sqrt(dx * dx + dy * dy);
-    //     return "M" + 
-    //         d.source.x + "," + 
-    //         d.source.y + "A" + 
-    //         dr + "," + dr + " 0 0,1 " + 
-    //         d.target.x + "," + 
-    //         d.target.y;
-    // });
-
-    // node
-    //     .attr("transform", function(d) { 
-    //         return "translate(" + d.x + "," + d.y + ")"; });
-    // } ;       
-
     // initial setup of the screen, which is just an SVG element in the browser window
     var initScreen = function() {
       cd.svg = d3.select('body')
@@ -145,18 +126,34 @@
               .attr("height",20)
               .attr("fill",function(d) { return (d.color); })
 
-      cd.d3leaderBoardText = cd.scoreSvg.selectAll("text")
+      cd.d3leaderBoardText = cd.scoreSvg.selectAll("text.playerID")
           .data(cd.data.leaderBoard)
           .enter()
           .append("text");
       cd.d3leaderBoardText
+          .attr("class","playerID")
           .attr("x",30)
           .attr("y",function(d){return (d.index*20 +20 );})
-          .text(function(d){return d.playerId ; })
+          .text(function(d){return d.name ; })
           .attr("font-family", "sans-serif")
           .attr("font-size", "10px")
           .attr("fill", "black");
-          
+
+      
+        cd.d3leaderBoardTime = cd.scoreSvg.selectAll("text.time")
+            .data(cd.data.game)
+            .enter();
+            cd.d3leaderBoardTime
+            .append("text")
+            .attr("class","time")
+            .attr("x",cd.data.screen["scoreWidth"]/2)
+            .attr("y",cd.data.screen["scoreHeight"]/2)
+            .text(function(d){return d.elapsedMS ; })
+            // .text(function(d){return d.elapsedMS})
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "10px")
+            .attr("fill", "black");
+
 /*
         cd.d3leaderBoard = cd.svg.selectAll("rect.leaderboard")
         .data(cd.data.leaderBoard)
@@ -219,7 +216,7 @@
         })
         .attr('fill', randomRGB());
 //        .attr('stroke', 'black');
-      
+
       // this is what redraws each frame
       window.setInterval(updateFrame, 1000/cd.data.screen.frameRate);
     }
@@ -232,11 +229,13 @@
           return console.warn(err);
         }
         cd.data = json;
+       // console.log(typeof(cd.data.game.elapsedMS));
+
       });
     };
       var updateLeaderboard = function(){
         cd.d3leaderBoard = cd.scoreSvg.selectAll("rect.leaderboard")
-          .data(cd.data.leaderBoard)
+          .data(cd.data.leaderBoard);
 
         cd.d3leaderBoard
           .enter()
@@ -246,7 +245,7 @@
           .attr("y", function(d) { return (  d.index * 20 ); })
           .attr("width",20)
           .attr("height",20)
-          .attr("fill",function(d) { return (d.color); })
+          .attr("fill",function(d) { return (d.color); });
 
         cd.d3leaderBoard
           .attr("rect.leaderboard","update")
@@ -255,11 +254,11 @@
           .attr("y", function(d) { return ( d.index*20 ); })
           .attr("width",20)
           .attr("height",20)
-          .attr("fill",function(d) { return (d.color); })
+          .attr("fill",function(d) { return (d.color); });
 
         cd.d3leaderBoard
           .exit()
-          .remove() 
+          .remove(); 
 
         cd.d3leaderBoardText = cd.scoreSvg.selectAll("text.playerID")
             .data(cd.data.leaderBoard);
@@ -268,7 +267,7 @@
             .attr("text.playerID","update")
             .attr("x",30)
             .attr("y",function(d){return (d.index*20 +20);})
-            .text(function(d){return d.playerId ; })
+            .text(function(d){return d.name ; })
             .attr("font-family", "sans-serif")
             .attr("font-size", "10px")
             .attr("fill", "black");
@@ -279,15 +278,40 @@
             .attr("class","playerID")
             .attr("x",30)
             .attr("y",function(d){return (d.index*20 +20 );})
-            .text(function(d){return d.playerId ; })
+            .text(function(d){return d.name ; })
             .attr("font-family", "sans-serif")
             .attr("font-size", "10px")
             .attr("fill", "black");        
         
         cd.d3leaderBoardText
           .exit()
-          .remove()
+          .remove();
 
+        cd.d3leaderBoardTime = cd.scoreSvg.selectAll("text.time")
+          .data(cd.data.game);
+
+        cd.d3leaderBoardTime
+            .attr("text.time","update")
+            .attr("x",30)
+            .attr("y",function(d){return (d.index*20 +20);})
+            .text(function(d){console.log("d");   return d.name ; })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "10px")
+            .attr("fill", "black");  
+        
+        cd.d3leaderBoardTime
+            .enter()
+            .append('text')
+            .attr("class","time")
+            .attr("x",cd.data.screen["scoreWidth"]/2)
+            .attr("y",cd.data.screen["scoreHeight"]/2)
+            // .text(function(d){console.log(d);return d.elapsedMS})
+            .text(function(d){return d.elapsedMS; })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "10px")
+            .attr("fill", "black"); 
+        
+        
       }    
     var updatePlayer   = function(){
       cd.d3players = cd.svg.selectAll("circle.player").data(cd.data.players);
@@ -450,6 +474,19 @@
       }
       return color;
     };
+
+    String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second parm
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    var time    = hours+':'+minutes+':'+seconds;
+    return time;
+}
   </script>
 </head>
 <body>
