@@ -121,7 +121,6 @@ var updateFrame = function() {
   else{
     console.log("game over!");
   }
-  
 };
 
 var updateGroups = function() {
@@ -165,7 +164,6 @@ var contains = function(a, obj) {
       return true;
     }
   }
-  // console.log(a+ " doesnt contain "+ obj);
   return false;
 }
 
@@ -287,74 +285,29 @@ var updateOrbs = function() {
     }
   });
 };
+
 var gameOver = function(){
-  console.log("Game time over!");
-  cd.data.playesrs =[];
+  //console.log("Game over!");
+  cd.data.players =[];
   cd.data.links = [];
   cd.data.orbs = [];
-  cd.data.groupd = [];
-  cd.data.game.running= false;
+  cd.data.groups = [];
+  cd.data.game.running = false;
 }
+
 //this updates game state
 var updateCountdown = function(){
-currentTime += 1000;
-cd.data.game["elapsedMS"] = "10";
-// console.logtypeof(cd.data.game["elapsedMS"]) );
+  currentTime += 1000;
+  cd.data.game["elapsedMS"] = "10";
+  // console.logtypeof(cd.data.game["elapsedMS"]) );
 }
+
 setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
 setTimeout(gameOver,cd.data.game["durationMS"]);
 setInterval(updateCountdown,1000)
-  
 
 
-app.get('/orbs/:id', function (req, res) {
-  if (!!(cd.data.orbs[req.params.id])) {
-    var body = JSON.stringify(cd.data.orbs[req.params.id]);
-    res.set('Content-Type', 'application/json');
-    res.set('Content-Length', body.length);
-    res.end(body);
-  }
-  else {
-    //console.log('req for non-existent orb id');
-    res.statusCode = 400;
-    res.end();
-  }
-});
-
-app.get('/orbs\/?$', function (req, res) {
-  if (!!(cd.data.orbs)) {
-    var body = JSON.stringify(cd.data.orbs);
-    res.set('Content-Type', 'application/json');
-    res.set('Content-Length', body.length);
-    res.end(body);
-  }
-  else {
-    res.statusCode = 400;
-    res.end();
-  }
-});
-
-app.get('/players/:id', function(req, res) {
-  if (!!cd.data.players[req.params.id]) { // FIXME: is this the right null test?
-    var body = JSON.stringify(cd.data.players[req.params.id]);
-    res.set('Content-Type', 'application/json');
-    res.set('Content-Length', body.length);
-    res.end(body);
-  }
-  else {
-    res.statusCode = 400;
-    res.end();
-  }
-});
-
-app.get('/players\/?$', function(req, res) {
-  var body = JSON.stringify(cd.data.players);
-  res.set('Content-Type', 'application/json');
-  res.set('Content-Length', body.length);
-  res.end(body);
-  // FIXME: error handling
-});
-
+// GAME FUNCTIONS
 var movePlayer = function(playerId, direction) {
   // accleration based on mass and speed
   //console.log('in movePlayer for player ' + playerId + ' direction ' + direction);
@@ -380,53 +333,6 @@ var movePlayer = function(playerId, direction) {
         element.xSpeed += cd.data.screen.frameRate/5 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
       }
     }
-  }
-};
-
-// update movement and cooperate/defect status for a player
-app.patch('/players/:id', function(req, res) {
-  //console.log('in patch for player ' + req.params.id);
-  if (!!cd.data.players[req.params.id]) {
-    //console.dir(req.body);
-    if (!!req.body.state) {
-      if ((req.body.state == 'cooperate') || (req.body.state == 'defect')) {
-        //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
-        cd.data.players[req.params.id].state = req.body.state;
-        console.log("State changed!" + cd.data.players[req.params.id].state);
-        if (req.body.state == 'cooperate') {
-          
-        }
-        else if (req.body.state == 'defect') {
-          removeLink(req.params.id);
-        }
-      }
-      else {
-        //console.log('state change specified but it is not cooperate or defect: ' + req.body.state);
-        res.statusCode = 400;
-      }
-    }
-    if (!!req.body.move && (req.body.move.match(/^(up|down|left|right)$/))) {
-      movePlayer(req.params.id, req.body.move);
-    }
-  }
-  else {
-    console.log('not a move or a state change');
-    res.statusCode = 400;
-  } res.end();  
-});
-
-// find distance between two objects, return distance in pixels
-// if return value is 0, objects are touching
-// if return value is positive, objects are touching and overlapping
-var findDistance = function(obj1, obj2) {
-  if ((obj1 !== null) && (obj2 !== null)) {
-    var dx = obj1.x - obj2.x;
-    var dy = obj1.y - obj2.y;
-    var dr = Math.sqrt(dx * dx + dy*dy);
-    var d = (obj1.radius + obj2.radius) - dr ;
-    // var r = obj1.radius + obj2.radius;
-    // console.log(dr + " " +r + " " + "distance = " +  d);
-    return d;
   }
 };
 
@@ -536,7 +442,23 @@ var hasLink = function(id1,id2){
   return false;
 }
 
-// return a random color, as an RGB hex string
+//find distance between two objects, return distance in pixels
+//if return value is 0, objects are touching
+//if return value is positive, objects are touching and overlapping
+var findDistance = function(obj1, obj2) {
+  if ((obj1 !== null) && (obj2 !== null)) {
+    var dx = obj1.x - obj2.x;
+    var dy = obj1.y - obj2.y;
+    var dr = Math.sqrt(dx * dx + dy*dy);
+    var d = (obj1.radius + obj2.radius) - dr ;
+    // var r = obj1.radius + obj2.radius;
+    // console.log(dr + " " +r + " " + "distance = " +  d);
+    return d;
+  }
+};
+
+
+//return a random color, as an RGB hex string
 var randomRGB = function() {
   var color = '#';
   for (var i = 0; i < 3; i++) {
@@ -548,6 +470,113 @@ var randomRGB = function() {
   }
   return color;
 };
+
+var flipCoin = function() {
+  if (Math.random() < 0.5) {
+    return -1;
+  }
+  else {
+    return 1;
+  }
+};
+
+// add a new orb
+var createOrb = function() {
+  console.log("in createOrb");
+  var orb = new Object();
+  orb.x = Math.floor(Math.random() * cd.data.screen.width);
+  orb.y = Math.floor(Math.random() * cd.data.screen.height);
+  orb.radius = cd.defaultRadius;
+  orb.id = cd.data.orbs.length;
+  orb.xSpeed = Math.ceil(Math.random() * cd.data.screen.frameRate) * flipCoin();
+  orb.ySpeed = Math.ceil(Math.random() * cd.data.screen.frameRate) * flipCoin();
+  cd.data.orbs.push(orb);
+}
+
+
+// END GAME FUNCTIONS
+
+
+// ROUTES
+app.get('/orbs/:id', function (req, res) {
+  if (!!(cd.data.orbs[req.params.id])) {
+    var body = JSON.stringify(cd.data.orbs[req.params.id]);
+    res.set('Content-Type', 'application/json');
+    res.set('Content-Length', body.length);
+    res.end(body);
+  }
+  else {
+    //console.log('req for non-existent orb id');
+    res.statusCode = 400;
+    res.end();
+  }
+});
+
+app.get('/orbs\/?$', function (req, res) {
+  if (!!(cd.data.orbs)) {
+    var body = JSON.stringify(cd.data.orbs);
+    res.set('Content-Type', 'application/json');
+    res.set('Content-Length', body.length);
+    res.end(body);
+  }
+  else {
+    res.statusCode = 400;
+    res.end();
+  }
+});
+
+app.get('/players/:id', function(req, res) {
+  if (!!cd.data.players[req.params.id]) { // FIXME: is this the right null test?
+    var body = JSON.stringify(cd.data.players[req.params.id]);
+    res.set('Content-Type', 'application/json');
+    res.set('Content-Length', body.length);
+    res.end(body);
+  }
+  else {
+    res.statusCode = 400;
+    res.end();
+  }
+});
+
+app.get('/players\/?$', function(req, res) {
+  var body = JSON.stringify(cd.data.players);
+  res.set('Content-Type', 'application/json');
+  res.set('Content-Length', body.length);
+  res.end(body);
+  // FIXME: error handling
+});
+
+// update movement and cooperate/defect status for a player
+app.patch('/players/:id', function(req, res) {
+  //console.log('in patch for player ' + req.params.id);
+  if (!!cd.data.players[req.params.id]) {
+    //console.dir(req.body);
+    if (!!req.body.state) {
+      if ((req.body.state == 'cooperate') || (req.body.state == 'defect')) {
+        //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
+        cd.data.players[req.params.id].state = req.body.state;
+        console.log("State changed!" + cd.data.players[req.params.id].state);
+        if (req.body.state == 'cooperate') {
+          
+        }
+        else if (req.body.state == 'defect') {
+          removeLink(req.params.id);
+        }
+      }
+      else {
+        //console.log('state change specified but it is not cooperate or defect: ' + req.body.state);
+        res.statusCode = 400;
+      }
+    }
+    if (!!req.body.move && (req.body.move.match(/^(up|down|left|right)$/))) {
+      movePlayer(req.params.id, req.body.move);
+    }
+  }
+  else {
+    console.log('not a move or a state change');
+    res.statusCode = 400;
+  } res.end();  
+});
 
 // create a new player
 app.post('/players\/?$', function(req, res) {
@@ -614,28 +643,4 @@ res.sendfile(__dirname + '/index.html');
 
 });
  
-
-var flipCoin = function() {
-  if (Math.random() < 0.5) {
-    return -1;
-  }
-  else {
-    return 1;
-  }
-};
-
-// add a new orb
-var createOrb = function() {
-  console.log("in createOrb");
-  var orb = new Object();
-  orb.x = Math.floor(Math.random() * cd.data.screen.width);
-  orb.y = Math.floor(Math.random() * cd.data.screen.height);
-  orb.radius = cd.defaultRadius;
-  orb.id = cd.data.orbs.length;
-  orb.xSpeed = Math.ceil(Math.random() * cd.data.screen.frameRate) * flipCoin();
-  orb.ySpeed = Math.ceil(Math.random() * cd.data.screen.frameRate) * flipCoin();
-  cd.data.orbs.push(orb);
-}
-
-
-
+// END ROUTES
