@@ -132,7 +132,7 @@
       .append("rect")
       .attr("class","leaderboard")
       .attr("x", 20)
-      .attr("y", function(d) { return ((cd.data.leaderBoard.length - d.index)*20 + 20); })
+      .attr("y", function(d) { return ((cd.data.leaderBoard.length - d.index)*20 ); })
       .attr("width",20)
       .attr("height",60)
       .attr("fill",function(d) { return (d.color); });
@@ -143,11 +143,11 @@
       .append("text");
       cd.d3leaderBoardText
       .attr("class","playerID")
-      .attr("x",30)
-      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 + 30 );})
+      .attr("x",80)
+      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 +20 );})
       .text(function(d){return d.name ; })
       .attr("font-family", "sans-serif")
-      .attr("font-size", "10px")
+      .attr("font-size", "14px")
       .attr("fill", "black");
 
       
@@ -162,7 +162,7 @@
       .text(function(d){return d.elapsedMS ; })
             // .text(function(d){return d.elapsedMS})
             .attr("font-family", "sans-serif")
-            .attr("font-size", "10px")
+            .attr("font-size", "14px")
             .attr("fill", "black");
 
 /*
@@ -253,7 +253,7 @@
       .append("rect")
       .attr("class","leaderboard")
       .attr("x", 20)
-      .attr("y", function(d) { return (  (cd.data.leaderBoard.length - d.index)* 20 ); })
+      .attr("y", function(d) { return (  (cd.data.leaderBoard.length - d.index)* 20  ); })
       .attr("width",60)
       .attr("height",20)
       .attr("fill",function(d) { return (d.color); });
@@ -276,35 +276,35 @@
 
       cd.d3leaderBoardText
       .attr("text.playerID","update")
-      .attr("x",30)
-      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index) +30);})
+      .attr("x",80)
+      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 +20 );})
       .text(function(d){return d.name ; })
       .attr("font-family", "sans-serif")
-      .attr("font-size", "10px")
+      .attr("font-size", "14px")
       .attr("fill", "black");
 
       cd.d3leaderBoardText
       .enter()
       .append('text')
       .attr("class","playerID")
-      .attr("x",30)
-      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20+ 30 );})
+      .attr("x",80)
+      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 +10 );})
       .text(function(d){return d.name ; })
       .attr("font-family", "sans-serif")
-      .attr("font-size", "10px")
+      .attr("font-size", "14px")
       .attr("fill", "black");        
 
       cd.d3leaderBoardText
       .exit()
       .remove();
-
+/*
       cd.d3leaderBoardTime = cd.scoreSvg.selectAll("text.time")
       .data(cd.data.game);
 
       cd.d3leaderBoardTime
       .attr("text.time","update")
-      .attr("x",30)
-      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 + 20);})
+      .attr("x",50)
+      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 +30 );})
       .text(function(d){console.log("d");   return d.name ; })
       .attr("font-family", "sans-serif")
       .attr("font-size", "10px")
@@ -323,7 +323,7 @@
             .attr("fill", "black"); 
 
 
-
+*/
 
           }    
 
@@ -467,7 +467,30 @@
         .text("Game Over!")
         .attr("font-family", "sans-serif")
         .attr("font-size", "12px")
-        .attr("fill", "red");        
+        .attr("fill", "red");
+
+        cd.d3leaderBoardText = cd.scoreSvg.selectAll("text.playerID")
+      .data(cd.data.leaderBoard);
+
+      cd.d3leaderBoardText
+      .attr("text.playerID","update")
+      .attr("x",80)
+      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 +10);})
+      .text(function(d){return d.name + " : "+d.score; })
+      .attr("font-family", "sans-serif")
+      .attr("font-size", "10px")
+      .attr("fill", "black");
+
+      cd.d3leaderBoardText
+      .enter()
+      .append('text')
+      .attr("class","playerID")
+      .attr("x",30)
+      .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20+ 10 );})
+      .text(function(d){return d.name + " : "+ d.score ; })
+      .attr("font-family", "sans-serif")
+      .attr("font-size", "14px")
+      .attr("fill", "black");                
       }
     // actually move elements to match game state
     var updateFrame = function() {

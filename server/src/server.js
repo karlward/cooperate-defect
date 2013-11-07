@@ -23,7 +23,7 @@ cd.data =
 {
   "game": {
     "id": 1,
-    "durationMS": 180000,
+    "durationMS": 150000,
     "elapsedMS": 0,
     "running":true
   },
@@ -220,7 +220,7 @@ var updateLeaderBoard = function() {
   //clear the old leaderboard data
   for(i in playersCopy) {
     // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
-    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id, "name": playersCopy[i].name};
+    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id, "name": playersCopy[i].name,"score": playersCopy[i].mass};
     cd.data.leaderBoard.push(newLeaderBoardItem);
   }
 }
