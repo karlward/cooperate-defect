@@ -5,8 +5,8 @@ var server = http.createServer(app);
 var url = require('url');
 
 // configure Express
-app.use(express.bodyParser());
-
+app.use(express.bodyParser())
+  .use(express.static(__dirname + '/../../browser/src'));
 server.listen(8000);
 
 var cd = new Object(); // for cooperate-defect package globals
@@ -607,11 +607,12 @@ app.post('/players\/?$', function(req, res) {
 });
 
 // serve index to browsers
+/*
 app.get('/', function (req, res) {  
   // res.sendfile(__dirname + '/index.html');
   res.sendfile(__dirname + '/CoopDef_Splash.html');
 
-});
+}); */
 
 app.get('/games/:id', function(req, res) {
   //console.log('request for /games/' + req.params.id);
@@ -632,15 +633,15 @@ app.get('/games', function(req, res) {
   console.log('request for /games');
   // FIXME: error handling
 });
+
 var userName= null;
 app.get('/form_action.asp', function(req, res) {
- // res.writeHead(200, {"Content-Type":"text/plain"});
+  // res.writeHead(200, {"Content-Type":"text/plain"});
 
- var params = url.parse(req.url,true).query;
- userName= params["id"];
-console.log(params);
-res.sendfile(__dirname + '/index.html');
-
+  var params = url.parse(req.url,true).query;
+  userName= params["id"];
+  console.log(params);
+  res.sendfile(__dirname + '/index.html');
 });
  
 // END ROUTES
