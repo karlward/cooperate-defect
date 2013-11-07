@@ -4,11 +4,12 @@ var http = require('http');
 var server = http.createServer(app);
 var url = require('url');
 
-// configure Express
-app.use(express.bodyParser());
-
+//configure Express
+app.use(express.bodyParser())
+.use(express.static(__dirname + '/../../browser/src'));
 server.listen(8000);
 
+<<<<<<< HEAD
 var cd = new Object(); // for cooperate-defect package globals
 
 // set some defaults
@@ -105,60 +106,22 @@ cd.data =
   "groups":[
   ]
 };
+=======
+var cd = require('./cd');
+>>>>>>> 2f84f4d8926bcce5202c1dae7075dce261e8c9ea
 
-var updateFrame = function() {
-  //if ((cd.data.orbs.length < 5) && (cd.data.orbs.length < cd.data.players.length - 1)) {
-  if(cd.data.game.running ===true){
-    if (cd.data.orbs.length < 1) {
-      createOrb();
-    }
+//var currentTime = 0; // FIXME: global
 
-    updatePlayers();
-    updateLinks();
-    updateOrbs();
-    updateGroups();
-  }
-  else{
-    console.log("game over!");
-  }
-  
-};
+var util = require('./util');
 
-var updateGroups = function() {
-  cd.data.links.forEach(function(link, linkIndex, links) {
-    if(cd.data.groups.length <= 0){
-      cd.data.groups.push({"players": [link.source.id, link.target.id]});     
-      // console.log("adding new group"); 
-    }
-    else {
-      cd.data.groups.forEach(function(group, groupIndex, groups) {
-        // console.log("Checking if: " + group.players + " contains "+ link.source);
-        if (contains(group.players, link.source.id)){
-          group.players.push(link.target.id);
-          //console.log("link id: " + link.target.id + " added to group as target"); 
-        }
-        else if (contains(group.players, link.target.id)) {
-          group.players.push(link.source.id);
-          //console.log("link id: " + link.source.id + "  added to group as source");
-        }
-        else {
-          groups.push({"players": [link.source.id, link.target.id]}); 
-          //console.log("link not found in current group adding new group");
-        }
-        group.players = deduplicate(group.players);
-      });      
-    }
-  });
-}
+var gameplay = require('./gameplay');
 
-var deduplicate = function(array){
-  var seen = new Object();
-  for (i in array) {
-    seen[array[i]]++;
-  }
-  return Object.keys(seen);
-}
+//TIMER STUFF
+setInterval(gameplay.updateFrame, 1000 / cd.data.screen.frameRate);
+setTimeout(gameplay.gameOver,cd.data.game["durationMS"]);
+setInterval(gameplay.updateCountdown,1000)
 
+<<<<<<< HEAD
 var contains = function(a, obj) {
   for (var i = 0; i < a.length; i++) {
     if (a[i] == obj) {
@@ -305,8 +268,12 @@ setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
 setTimeout(gameOver,cd.data.game["durationMS"]);
 setInterval(updateCountdown,1000)
   
+=======
+//END TIMER STUFF
+>>>>>>> 2f84f4d8926bcce5202c1dae7075dce261e8c9ea
 
 
+//ROUTES
 app.get('/orbs/:id', function (req, res) {
   if (!!(cd.data.orbs[req.params.id])) {
     var body = JSON.stringify(cd.data.orbs[req.params.id]);
@@ -355,35 +322,7 @@ app.get('/players\/?$', function(req, res) {
   // FIXME: error handling
 });
 
-var movePlayer = function(playerId, direction) {
-  // accleration based on mass and speed
-  //console.log('in movePlayer for player ' + playerId + ' direction ' + direction);
-  if (!!cd.data.players[playerId]) {
-    var element = cd.data.players[playerId];
-    if (direction === 'up') {
-      if (Math.abs(element.ySpeed) < 15) {
-        element.ySpeed += cd.data.screen.frameRate/-5 + (-1 * (cd.data.screen.frameRate + element.ySpeed) / element.mass);
-      }
-    }
-    else if (direction === 'down') {
-      if (Math.abs(element.ySpeed) < 15) {
-        element.ySpeed += cd.data.screen.frameRate/5 + ((cd.data.screen.frameRate + element.ySpeed) / element.mass);
-      }
-    }
-    else if (direction === 'left') {
-      if (Math.abs(element.xSpeed) < 15) {
-        element.xSpeed += cd.data.screen.frameRate/-5 + (-1 * (cd.data.screen.frameRate + element.xSpeed) / element.mass);
-      }
-    }
-    else if (direction === 'right') {
-      if (Math.abs(element.xSpeed) < 15) {
-        element.xSpeed += cd.data.screen.frameRate/5 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
-      }
-    }
-  }
-};
-
-// update movement and cooperate/defect status for a player
+//update movement and cooperate/defect status for a player
 app.patch('/players/:id', function(req, res) {
   //console.log('in patch for player ' + req.params.id);
   if (!!cd.data.players[req.params.id]) {
@@ -394,10 +333,10 @@ app.patch('/players/:id', function(req, res) {
         cd.data.players[req.params.id].state = req.body.state;
         console.log("State changed!" + cd.data.players[req.params.id].state);
         if (req.body.state == 'cooperate') {
-          
+
         }
         else if (req.body.state == 'defect') {
-          removeLink(req.params.id);
+          gameplay.removeLink(req.params.id);
         }
       }
       else {
@@ -406,7 +345,7 @@ app.patch('/players/:id', function(req, res) {
       }
     }
     if (!!req.body.move && (req.body.move.match(/^(up|down|left|right)$/))) {
-      movePlayer(req.params.id, req.body.move);
+      gameplay.movePlayer(req.params.id, req.body.move);
     }
   }
   else {
@@ -415,159 +354,24 @@ app.patch('/players/:id', function(req, res) {
   } res.end();  
 });
 
-// find distance between two objects, return distance in pixels
-// if return value is 0, objects are touching
-// if return value is positive, objects are touching and overlapping
-var findDistance = function(obj1, obj2) {
-  if ((obj1 !== null) && (obj2 !== null)) {
-    var dx = obj1.x - obj2.x;
-    var dy = obj1.y - obj2.y;
-    var dr = Math.sqrt(dx * dx + dy*dy);
-    var d = (obj1.radius + obj2.radius) - dr ;
-    // var r = obj1.radius + obj2.radius;
-    // console.log(dr + " " +r + " " + "distance = " +  d);
-    return d;
-  }
-};
-
-var checkForLinks = function() {
-  // console.log("No. of Player : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
-  for (i in cd.data.players) {
-    for (j in cd.data.players) {
-      if (!!cd.data.players[i] && !!cd.data.players[j]) {
-        // console.log(cd.data.players[i].id +" : "+cd.data.players[j].id);
-        if (cd.data.players[i].id !== cd.data.players[j].id){
-          if ((findDistance(cd.data.players[i], cd.data.players[j]) >= 0) 
-              && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
-            addLink(cd.data.players[i].id, cd.data.players[j].id);
-          }
-          else {
-            // console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
-          }
-        }  
-      }
-      else {
-        console.log("Some players id is null");
-      }
-    }
-  }  
-}
-
-var addLink = function(sourceId, targetId){
-
-  if(hasLink(sourceId, targetId) == false){
-  var newLink  = {     
-        "source" :{ 
-          "id":cd.data.players[sourceId].id,
-          "x": cd.data.players[sourceId].x,
-          "y": cd.data.players[sourceId].y
-        },
-        "target" :{ 
-          "id":cd.data.players[targetId].id,
-          "x": cd.data.players[targetId].x,
-          "y": cd.data.players[targetId].y
-        },
-        "value" : 1
-      };
-      cd.data.players[sourceId].numberOfLinks++; 
-      cd.data.players[targetId].numberOfLinks++;
-      console.log("Added new link");
-      cd.data.links.push(newLink);
-  }
-}
-
-var removeLink = function(id){
-  var i = cd.data.links.length;
-
-  //Remove from links
-  console.log("Checking for links to remove with id :" + id );
-  while(i--){
-      console.log("Checking index :" + i);
-    //if id is a link source remove that link
-    if(cd.data.links[i].source.id == id){
-        //remove link object
-        console.log("Removing source link at index : " + i );
-        cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
-        cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
-        cd.data.links.splice(i,1);
-    } 
-
-    //if id is a link target remove
-    if(cd.data.links[i].target.id == id){
-      console.log("Removing target link at index : " + i );
-      cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
-      cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
-      cd.data.links.splice(i,1);
-    }
-
-  }
-  //remove from groups
-  cd.data.groups.forEach(function(element,index,array){
-    if(contains(element.players,id)){
-      console.log("Removing player with id :" + id + "from group"+ element.players);
-      cd.data.groups.splice(index,1);
-
-    }
-
-  });
-
-  console.log("Done Checking");
-}
-
-var hasLink = function(id1,id2){
-  for(i in cd.data.links){
-    if(cd.data.links[i].source.id == id1){
-        if(cd.data.links[i].target.id == id2){
-          return true;
-          console.log("Link found between id :" + id1 + " and id :" +id2);
-        }
-    }
-  }   
-
-  for(j in cd.data.links){
-    if(cd.data.links[j].source.id == id2){
-      if(cd.data.links[j].target.id == id1){
-        console.log("Link found between id :" + id1 + " and id :" +id2);
-        return true;
-      }
-    }
-  }
-  console.log(" No Link found between id :" + id1 + " and id :" +id2);
-  return false;
-}
-
-// return a random color, as an RGB hex string
-var randomRGB = function() {
-  var color = '#';
-  for (var i = 0; i < 3; i++) {
-    var component = (Math.floor(Math.random() * 255)).toString(16);
-    if (component.toString().length < 2) {
-      component = '0' + component.toString();
-    }
-    color = color + component;
-  }
-  return color;
-};
-
-// create a new player
+//create a new player
 app.post('/players\/?$', function(req, res) {
- 
   console.log('in post for new player');
   var newPlayer = {
-    "id": cd.data.players.length,
-    "name": userName, // FIXME: implement
-    "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
-    "y": Math.floor(Math.random() * cd.data.screen.height),
-    "xSpeed": 0,
-    "ySpeed": 0,
-    "radius": cd.defaultRadius,
-    "mass": cd.defaultMass,
-    "state": cd.defaultState,
-    "effect": "new",
-    "color": randomRGB(),
-    "score": 0,
-    "currentRank":cd.data.players.length,
-    "numberOfLinks": 0,
+      "id": cd.data.players.length,
+      "name": userName, // FIXME: implement
+      "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
+      "y": Math.floor(Math.random() * cd.data.screen.height),
+      "xSpeed": 0,
+      "ySpeed": 0,
+      "radius": cd.defaultRadius,
+      "mass": cd.defaultMass,
+      "state": cd.defaultState,
+      "effect": "new",
+      "color": util.randomRGB(),
+      "score": 0,
+      "currentRank":cd.data.players.length,
+      "numberOfLinks": 0,
   };
   console.log("New Player added !");
   cd.data.players.push(newPlayer);
@@ -575,13 +379,6 @@ app.post('/players\/?$', function(req, res) {
   //console.log('body is ' + body);
   //res.statusCode = 200;
   res.end(body);
-});
-
-// serve index to browsers
-app.get('/', function (req, res) {  
-  // res.sendfile(__dirname + '/index.html');
-  res.sendfile(__dirname + '/CoopDef_Splash.html');
-
 });
 
 app.get('/games/:id', function(req, res) {
@@ -598,44 +395,20 @@ app.get('/games/:id', function(req, res) {
   res.end();
 });
 
-// FIXME: /games should return a list of games
+//FIXME: /games should return a list of games
 app.get('/games', function(req, res) {
   console.log('request for /games');
   // FIXME: error handling
 });
-var userName= null;
-app.get('/form_action.asp', function(req, res) {
- // res.writeHead(200, {"Content-Type":"text/plain"});
 
- var params = url.parse(req.url,true).query;
- userName= params["id"];
-console.log(params);
-res.sendfile(__dirname + '/index.html');
+var userName= null; // FIXME: is this necessary?
+app.get('/form_action.asp', function(req, res) { // FIXME: rename route, consider replacement with static file or SPA
+  // res.writeHead(200, {"Content-Type":"text/plain"});
 
+  var params = url.parse(req.url,true).query;
+  userName= params["id"];
+  console.log(params);
+  res.sendfile(__dirname + '/index.html');
 });
- 
 
-var flipCoin = function() {
-  if (Math.random() < 0.5) {
-    return -1;
-  }
-  else {
-    return 1;
-  }
-};
-
-// add a new orb
-var createOrb = function() {
-  console.log("in createOrb");
-  var orb = new Object();
-  orb.x = Math.floor(Math.random() * cd.data.screen.width);
-  orb.y = Math.floor(Math.random() * cd.data.screen.height);
-  orb.radius = cd.defaultRadius;
-  orb.id = cd.data.orbs.length;
-  orb.xSpeed = Math.ceil(Math.random() * cd.data.screen.frameRate) * flipCoin();
-  orb.ySpeed = Math.ceil(Math.random() * cd.data.screen.frameRate) * flipCoin();
-  cd.data.orbs.push(orb);
-}
-
-
-
+//END ROUTES
