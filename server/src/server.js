@@ -106,6 +106,63 @@ cd.data =
   ]
 };
 
+
+// UTIL FUNCTIONS
+var deduplicate = function(array){
+  var seen = new Object();
+  for (i in array) {
+    seen[array[i]]++;
+  }
+  return Object.keys(seen);
+}
+
+var contains = function(a, obj) {
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] == obj) {
+      return true;
+    }
+  }
+  return false;
+}
+
+//return a random color, as an RGB hex string
+var randomRGB = function() {
+  var color = '#';
+  for (var i = 0; i < 3; i++) {
+    var component = (Math.floor(Math.random() * 255)).toString(16);
+    if (component.toString().length < 2) {
+      component = '0' + component.toString();
+    }
+    color = color + component;
+  }
+  return color;
+};
+
+var flipCoin = function() {
+  if (Math.random() < 0.5) {
+    return -1;
+  }
+  else {
+    return 1;
+  }
+};
+
+function sortBy(prop) {
+  return function(a,b) {
+    if (a[prop] > b[prop]){
+      return 1;
+    }
+    else if (a[prop] < b[prop]){
+      return -1;
+    }
+    return 0;
+  }
+}
+
+// END UTIL FUNCTIONS
+
+
+// GAME FUNCTIONS
 var updateFrame = function() {
   //if ((cd.data.orbs.length < 5) && (cd.data.orbs.length < cd.data.players.length - 1)) {
   if(cd.data.game.running ===true){
@@ -148,23 +205,6 @@ var updateGroups = function() {
       });      
     }
   });
-}
-
-var deduplicate = function(array){
-  var seen = new Object();
-  for (i in array) {
-    seen[array[i]]++;
-  }
-  return Object.keys(seen);
-}
-
-var contains = function(a, obj) {
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] == obj) {
-      return true;
-    }
-  }
-  return false;
 }
 
 var updatePlayers = function() {
@@ -220,18 +260,6 @@ var updateLeaderBoard = function() {
     // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
     var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id, "name": playersCopy[i].name};
     cd.data.leaderBoard.push(newLeaderBoardItem);
-  }
-}
-
-function sortBy(prop) {
-  return function(a,b) {
-    if (a[prop] > b[prop]){
-      return 1;
-    }
-    else if (a[prop] < b[prop]){
-      return -1;
-    }
-    return 0;
   }
 }
 
@@ -302,12 +330,6 @@ var updateCountdown = function(){
   // console.logtypeof(cd.data.game["elapsedMS"]) );
 }
 
-setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
-setTimeout(gameOver,cd.data.game["durationMS"]);
-setInterval(updateCountdown,1000)
-
-
-// GAME FUNCTIONS
 var movePlayer = function(playerId, direction) {
   // accleration based on mass and speed
   //console.log('in movePlayer for player ' + playerId + ' direction ' + direction);
@@ -359,86 +381,82 @@ var checkForLinks = function() {
   }  
 }
 
-var addLink = function(sourceId, targetId){
-
-  if(hasLink(sourceId, targetId) == false){
-  var newLink  = {     
-        "source" :{ 
-          "id":cd.data.players[sourceId].id,
-          "x": cd.data.players[sourceId].x,
-          "y": cd.data.players[sourceId].y
-        },
-        "target" :{ 
-          "id":cd.data.players[targetId].id,
-          "x": cd.data.players[targetId].x,
-          "y": cd.data.players[targetId].y
-        },
-        "value" : 1
-      };
-      cd.data.players[sourceId].numberOfLinks++; 
-      cd.data.players[targetId].numberOfLinks++;
-      console.log("Added new link");
-      cd.data.links.push(newLink);
+var addLink = function(sourceId, targetId) {
+  if (hasLink(sourceId, targetId) == false) {
+    var newLink = {
+      "source": {
+        "id":cd.data.players[sourceId].id,
+        "x": cd.data.players[sourceId].x,
+        "y": cd.data.players[sourceId].y
+      },
+      "target": {
+        "id": cd.data.players[targetId].id,
+        "x": cd.data.players[targetId].x,
+        "y": cd.data.players[targetId].y
+      },
+      "value": 1
+    };
+    cd.data.players[sourceId].numberOfLinks++; 
+    cd.data.players[targetId].numberOfLinks++;
+    console.log("Added new link");
+    cd.data.links.push(newLink);
   }
 }
 
-var removeLink = function(id){
+var removeLink = function(id) {
   var i = cd.data.links.length;
 
   //Remove from links
   console.log("Checking for links to remove with id :" + id );
   while(i--){
-      console.log("Checking index :" + i);
+    console.log("Checking index :" + i);
     //if id is a link source remove that link
-    if(cd.data.links[i].source.id == id){
-        //remove link object
-        console.log("Removing source link at index : " + i );
-        cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
-        cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
-        cd.data.links.splice(i,1);
+    if (cd.data.links[i].source.id === id) {
+      //remove link object
+      console.log("Removing source link at index : " + i );
+      cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
+      cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
+      cd.data.links.splice(i,1);
     } 
 
     //if id is a link target remove
-    if(cd.data.links[i].target.id == id){
+    if (cd.data.links[i].target.id === id) {
       console.log("Removing target link at index : " + i );
       cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
       cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
       cd.data.links.splice(i,1);
     }
-
   }
   //remove from groups
-  cd.data.groups.forEach(function(element,index,array){
-    if(contains(element.players,id)){
+  cd.data.groups.forEach(function(element,index,array) {
+    if (contains(element.players,id)) {
       console.log("Removing player with id :" + id + "from group"+ element.players);
       cd.data.groups.splice(index,1);
-
     }
-
   });
 
   console.log("Done Checking");
 }
 
-var hasLink = function(id1,id2){
-  for(i in cd.data.links){
-    if(cd.data.links[i].source.id == id1){
-        if(cd.data.links[i].target.id == id2){
-          return true;
-          console.log("Link found between id :" + id1 + " and id :" +id2);
-        }
+var hasLink = function(id1,id2) {
+  for (i in cd.data.links) {
+    if (cd.data.links[i].source.id === id1) {
+      if (cd.data.links[i].target.id === id2) {
+        return true;
+        console.log("Link found between id :" + id1 + " and id :" + id2);
+      }
     }
-  }   
+  }
 
-  for(j in cd.data.links){
-    if(cd.data.links[j].source.id == id2){
-      if(cd.data.links[j].target.id == id1){
-        console.log("Link found between id :" + id1 + " and id :" +id2);
+  for (j in cd.data.links) {
+    if (cd.data.links[j].source.id === id2) {
+      if(cd.data.links[j].target.id == id1) {
+        console.log("Link found between id :" + id1 + " and id :" + id2);
         return true;
       }
     }
   }
-  console.log(" No Link found between id :" + id1 + " and id :" +id2);
+  console.log("No Link found between id :" + id1 + " and id :" + id2);
   return false;
 }
 
@@ -457,29 +475,6 @@ var findDistance = function(obj1, obj2) {
   }
 };
 
-
-//return a random color, as an RGB hex string
-var randomRGB = function() {
-  var color = '#';
-  for (var i = 0; i < 3; i++) {
-    var component = (Math.floor(Math.random() * 255)).toString(16);
-    if (component.toString().length < 2) {
-      component = '0' + component.toString();
-    }
-    color = color + component;
-  }
-  return color;
-};
-
-var flipCoin = function() {
-  if (Math.random() < 0.5) {
-    return -1;
-  }
-  else {
-    return 1;
-  }
-};
-
 // add a new orb
 var createOrb = function() {
   console.log("in createOrb");
@@ -493,8 +488,15 @@ var createOrb = function() {
   cd.data.orbs.push(orb);
 }
 
-
 // END GAME FUNCTIONS
+
+
+// TIMER STUFF
+setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
+setTimeout(gameOver,cd.data.game["durationMS"]);
+setInterval(updateCountdown,1000)
+
+// END TIMER STUFF
 
 
 // ROUTES
@@ -580,7 +582,6 @@ app.patch('/players/:id', function(req, res) {
 
 // create a new player
 app.post('/players\/?$', function(req, res) {
- 
   console.log('in post for new player');
   var newPlayer = {
     "id": cd.data.players.length,
@@ -606,14 +607,6 @@ app.post('/players\/?$', function(req, res) {
   res.end(body);
 });
 
-// serve index to browsers
-/*
-app.get('/', function (req, res) {  
-  // res.sendfile(__dirname + '/index.html');
-  res.sendfile(__dirname + '/CoopDef_Splash.html');
-
-}); */
-
 app.get('/games/:id', function(req, res) {
   //console.log('request for /games/' + req.params.id);
   if (cd.data.game.id == req.params.id) { // FIXME: hardcoded single game id
@@ -634,7 +627,7 @@ app.get('/games', function(req, res) {
   // FIXME: error handling
 });
 
-var userName= null;
+var userName= null; // FIXME: is this necessary?
 app.get('/form_action.asp', function(req, res) {
   // res.writeHead(200, {"Content-Type":"text/plain"});
 
