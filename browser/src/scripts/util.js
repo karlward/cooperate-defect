@@ -24,7 +24,7 @@ define(function() {
     var timeString = hours + ':' + minutes + ':' + seconds;
     return timeString;
   }
-  
+
   return {
     "randomRGB": randomRGB,
     "toHHMMSS": toHHMMSS,

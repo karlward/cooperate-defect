@@ -4,120 +4,54 @@ var http = require('http');
 var server = http.createServer(app);
 var url = require('url');
 
-/*
 var requirejs = require('requirejs');
 requirejs.config({
-    //Pass the top-level main.js/index.js require
-    //function to requirejs so that node modules
-    //are loaded relative to the top-level JS file.
-    nodeRequire: require
-}); */
+  //Pass the top-level main.js/index.js require
+  //function to requirejs so that node modules
+  //are loaded relative to the top-level JS file.
+  nodeRequire: require
+});
 
 
-// configure Express
+//configure Express
 app.use(express.bodyParser())
-  .use(express.static(__dirname + '/../../browser/src'));
+.use(express.static(__dirname + '/../../browser/src'));
 server.listen(8000);
 
 var cd = new Object(); // for cooperate-defect package globals
 
-// set some defaults
+//set some defaults
 cd.defaultRadius = 10;
 cd.defaultMass = 10;
 cd.defaultMinLinkDist = 10;
 cd.defaultState = "cooperate";
 var currentTime = 0;
 
-// FIXME: for now, load a game in code
+//FIXME: for now, load a game in code
 cd.data = 
 {
-  "game": {
-    "id": 1,
-    "durationMS": 180000,
-    "elapsedMS": 0,
-    "running":true
-  },
-  "screen": {
-    "width": 800,
-    "height": 600,
-    "scoreWidth": 200,
-    "scoreHeight": 500,
-    "frameRate": 10
-  },  
-  "players": [
-/*
-  {
-    "id": 0,
-    "name": "Surya",
-    "x": 120,
-    "y": 185,
-    "xSpeed": 0,
-    "ySpeed": 0,
-    "radius": 40,
-    "mass": 40,
-    "state": "cooperate",
-    "effect": "none",
-    "color": "#ff0000",
-    "score": 10,
-    "currentRank": 1,
-    "numberOfLinks": 0
-  },
-  {
-    "id": 1,
-    "name": "Jon",
-    "x": 402,
-    "y": 300,
-    "xSpeed": 0,
-    "ySpeed": 0,
-    "radius": 15,
-    "mass": 15,
-    "state": "cooperate",
-    "effect": "point",
-    "color": "#00ff00",
-    "score": 30,
-    "currentRank": 2,
-    "numberOfLinks": 0
-  },
-  {
-    "id": 2,
-    "name": "Karl",
-    "x": 20,
-    "y": 40,
-    "xSpeed": 0,
-    "ySpeed": 0,
-    "radius": 10,
-    "mass": 10,
-    "state": "cooperate",
-    "effect": "none",
-    "color": "#0000ff",
-    "score": 20,
-    "currentRank": 3,
-    "numberOfLinks": 0
-  }
-*/
-  ],
-  "orbs": [
-/*
-    {
-      "id": 0,
-      "x": 250,
-      "y": 250,
-      "xSpeed": 5,
-      "ySpeed": 5,
-      "radius": cd.defaultRadius,
-    }
-*/
-  ],
-  "links": [
-  ],
-  "leaderBoard":[
-  ],
-  "groups":[
-  ]
+    "game": {
+      "id": 1,
+      "durationMS": 180000,
+      "elapsedMS": 0,
+      "running":true
+    },
+    "screen": {
+      "width": 800,
+      "height": 600,
+      "scoreWidth": 200,
+      "scoreHeight": 500,
+      "frameRate": 10
+    },  
+    "players": [],
+    "orbs": [],
+    "links": [],
+    "leaderBoard":[],
+    "groups":[]
 };
 
 
-// UTIL FUNCTIONS
+//UTIL FUNCTIONS
 var deduplicate = function(array){
   var seen = new Object();
   for (i in array) {
@@ -169,10 +103,10 @@ function sortBy(prop) {
   }
 }
 
-// END UTIL FUNCTIONS
+//END UTIL FUNCTIONS
 
 
-// GAME FUNCTIONS
+//GAME FUNCTIONS
 var updateFrame = function() {
   //if ((cd.data.orbs.length < 5) && (cd.data.orbs.length < cd.data.players.length - 1)) {
   if(cd.data.game.running ===true){
@@ -236,7 +170,7 @@ var updatePlayers = function() {
       newY = cd.data.screen.height;
     }
     element.y = newY;
-    
+
     // deceleration based on mass and current speed
     if (element.xSpeed > 0) {
       element.xSpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass); // slow yo roll dawg
@@ -244,7 +178,7 @@ var updatePlayers = function() {
     else if (element.xSpeed < 0) {
       element.xSpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);  // slow yo negative roll
     }
-    
+
     if (element.ySpeed > 0) {
       element.ySpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
     }
@@ -264,7 +198,7 @@ var updateLeaderBoard = function() {
   }
 
   playersCopy.sort(sortBy("mass"));
-  
+
   //clear the old leaderboard data
   for(i in playersCopy) {
     // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
@@ -287,7 +221,7 @@ var updateOrbs = function() {
   cd.data.orbs.forEach(function(orb, orbIndex, orbs) {
     orb.x = orb.x + orb.xSpeed;
     orb.y = orb.y + orb.ySpeed;
-    
+
     cd.data.players.forEach(function(player, playerIndex, players) {
       if (!!orbs[orbIndex]) {
         var dist = findDistance(orb, player);
@@ -311,12 +245,12 @@ var updateOrbs = function() {
         }
       }
     });
-    
+
     if (!!orbs[orbIndex]) {
       if ((orb.x >= cd.data.screen.width)
-        || (orb.x <= 0)
-        || (orb.y >= cd.data.screen.height)
-        || (orb.y <= 0)) {
+          || (orb.x <= 0)
+          || (orb.y >= cd.data.screen.height)
+          || (orb.y <= 0)) {
         console.log('removing orb');
         orbs.splice(orbIndex); // remove it, no player captured this orb
       }
@@ -394,17 +328,17 @@ var checkForLinks = function() {
 var addLink = function(sourceId, targetId) {
   if (hasLink(sourceId, targetId) == false) {
     var newLink = {
-      "source": {
-        "id":cd.data.players[sourceId].id,
-        "x": cd.data.players[sourceId].x,
-        "y": cd.data.players[sourceId].y
-      },
-      "target": {
-        "id": cd.data.players[targetId].id,
-        "x": cd.data.players[targetId].x,
-        "y": cd.data.players[targetId].y
-      },
-      "value": 1
+        "source": {
+          "id":cd.data.players[sourceId].id,
+          "x": cd.data.players[sourceId].x,
+          "y": cd.data.players[sourceId].y
+        },
+        "target": {
+          "id": cd.data.players[targetId].id,
+          "x": cd.data.players[targetId].x,
+          "y": cd.data.players[targetId].y
+        },
+        "value": 1
     };
     cd.data.players[sourceId].numberOfLinks++; 
     cd.data.players[targetId].numberOfLinks++;
@@ -485,7 +419,7 @@ var findDistance = function(obj1, obj2) {
   }
 };
 
-// add a new orb
+//add a new orb
 var createOrb = function() {
   console.log("in createOrb");
   var orb = new Object();
@@ -498,18 +432,18 @@ var createOrb = function() {
   cd.data.orbs.push(orb);
 }
 
-// END GAME FUNCTIONS
+//END GAME FUNCTIONS
 
 
-// TIMER STUFF
+//TIMER STUFF
 setInterval(updateFrame, 1000 / cd.data.screen.frameRate);
 setTimeout(gameOver,cd.data.game["durationMS"]);
 setInterval(updateCountdown,1000)
 
-// END TIMER STUFF
+//END TIMER STUFF
 
 
-// ROUTES
+//ROUTES
 app.get('/orbs/:id', function (req, res) {
   if (!!(cd.data.orbs[req.params.id])) {
     var body = JSON.stringify(cd.data.orbs[req.params.id]);
@@ -558,7 +492,7 @@ app.get('/players\/?$', function(req, res) {
   // FIXME: error handling
 });
 
-// update movement and cooperate/defect status for a player
+//update movement and cooperate/defect status for a player
 app.patch('/players/:id', function(req, res) {
   //console.log('in patch for player ' + req.params.id);
   if (!!cd.data.players[req.params.id]) {
@@ -569,7 +503,7 @@ app.patch('/players/:id', function(req, res) {
         cd.data.players[req.params.id].state = req.body.state;
         console.log("State changed!" + cd.data.players[req.params.id].state);
         if (req.body.state == 'cooperate') {
-          
+
         }
         else if (req.body.state == 'defect') {
           removeLink(req.params.id);
@@ -590,24 +524,24 @@ app.patch('/players/:id', function(req, res) {
   } res.end();  
 });
 
-// create a new player
+//create a new player
 app.post('/players\/?$', function(req, res) {
   console.log('in post for new player');
   var newPlayer = {
-    "id": cd.data.players.length,
-    "name": userName, // FIXME: implement
-    "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
-    "y": Math.floor(Math.random() * cd.data.screen.height),
-    "xSpeed": 0,
-    "ySpeed": 0,
-    "radius": cd.defaultRadius,
-    "mass": cd.defaultMass,
-    "state": cd.defaultState,
-    "effect": "new",
-    "color": randomRGB(),
-    "score": 0,
-    "currentRank":cd.data.players.length,
-    "numberOfLinks": 0,
+      "id": cd.data.players.length,
+      "name": userName, // FIXME: implement
+      "x": Math.floor(Math.random() * cd.data.screen.width), // FIXME: should find an empty spot on screen
+      "y": Math.floor(Math.random() * cd.data.screen.height),
+      "xSpeed": 0,
+      "ySpeed": 0,
+      "radius": cd.defaultRadius,
+      "mass": cd.defaultMass,
+      "state": cd.defaultState,
+      "effect": "new",
+      "color": randomRGB(),
+      "score": 0,
+      "currentRank":cd.data.players.length,
+      "numberOfLinks": 0,
   };
   console.log("New Player added !");
   cd.data.players.push(newPlayer);
@@ -631,14 +565,14 @@ app.get('/games/:id', function(req, res) {
   res.end();
 });
 
-// FIXME: /games should return a list of games
+//FIXME: /games should return a list of games
 app.get('/games', function(req, res) {
   console.log('request for /games');
   // FIXME: error handling
 });
 
 var userName= null; // FIXME: is this necessary?
-app.get('/form_action.asp', function(req, res) {
+app.get('/form_action.asp', function(req, res) { // FIXME: rename route, consider replacement with static file or SPA
   // res.writeHead(200, {"Content-Type":"text/plain"});
 
   var params = url.parse(req.url,true).query;
@@ -646,5 +580,5 @@ app.get('/form_action.asp', function(req, res) {
   console.log(params);
   res.sendfile(__dirname + '/index.html');
 });
- 
-// END ROUTES
+
+//END ROUTES
