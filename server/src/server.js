@@ -5,8 +5,8 @@ var server = http.createServer(app);
 var url = require('url');
 
 //configure Express
-app.use(express.bodyParser())
-.use(express.static(__dirname + '/../../browser/src'));
+app.use(express.bodyParser());
+app.use(express.static(__dirname + '/../../browser/src'));
 server.listen(8000);
 
 <<<<<<< HEAD
@@ -325,18 +325,19 @@ app.get('/players\/?$', function(req, res) {
 //update movement and cooperate/defect status for a player
 app.patch('/players/:id', function(req, res) {
   //console.log('in patch for player ' + req.params.id);
-  if (!!cd.data.players[req.params.id]) {
+  var id = Number(req.params.id);
+  if (!!cd.data.players[id]) {
     //console.dir(req.body);
     if (!!req.body.state) {
-      if ((req.body.state == 'cooperate') || (req.body.state == 'defect')) {
+      if ((req.body.state === 'cooperate') || (req.body.state === 'defect')) {
         //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
         cd.data.players[req.params.id].state = req.body.state;
-        console.log("State changed!" + cd.data.players[req.params.id].state);
-        if (req.body.state == 'cooperate') {
+        console.log("State changed for player " + id + ": " + cd.data.players[id].state);
+        if (req.body.state === 'cooperate') {
 
         }
-        else if (req.body.state == 'defect') {
-          gameplay.removeLink(req.params.id);
+        else if (req.body.state === 'defect') {
+          gameplay.removeLink(id);
         }
       }
       else {
@@ -345,7 +346,7 @@ app.patch('/players/:id', function(req, res) {
       }
     }
     if (!!req.body.move && (req.body.move.match(/^(up|down|left|right)$/))) {
-      gameplay.movePlayer(req.params.id, req.body.move);
+      gameplay.movePlayer(id, req.body.move);
     }
   }
   else {
@@ -383,7 +384,7 @@ app.post('/players\/?$', function(req, res) {
 
 app.get('/games/:id', function(req, res) {
   //console.log('request for /games/' + req.params.id);
-  if (cd.data.game.id == req.params.id) { // FIXME: hardcoded single game id
+  if (cd.data.game.id === Number(req.params.id)) { // FIXME: hardcoded single game id
     var body = JSON.stringify(cd.data); // FIXME: multiple games?
     res.set('Content-Type', 'application/json');
     res.set('Content-Length', body.length);

@@ -17,7 +17,7 @@ require(['util', 'drawing', 'cd'], function(util, drawing, cd) {
         success: function(postData) {
           //console.log("POST succeeded for new player " + postData.id);
           console.dir(postData);
-          cd.playerId = postData.id;
+          cd.playerId = Number(postData.id);
           //console.log('set playerId to ' + cd.playerId);
         },
         error: function() {
