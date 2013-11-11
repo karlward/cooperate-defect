@@ -80,14 +80,14 @@ app.patch('/players/:id', function(req, res) {
   if (!!cd.data.players[req.params.id]) {
     //console.dir(req.body);
     if (!!req.body.state) {
-      if ((req.body.state == 'cooperate') || (req.body.state == 'defect')) {
+      if ((req.body.state === 'cooperate') || (req.body.state === 'defect')) {
         //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
         cd.data.players[req.params.id].state = req.body.state;
         console.log("State changed!" + cd.data.players[req.params.id].state);
-        if (req.body.state == 'cooperate') {
+        if (req.body.state === 'cooperate') {
 
         }
-        else if (req.body.state == 'defect') {
+        else if (req.body.state === 'defect') {
           gameplay.removeLink(req.params.id);
         }
       }
@@ -135,7 +135,7 @@ app.post('/players\/?$', function(req, res) {
 
 app.get('/games/:id', function(req, res) {
   //console.log('request for /games/' + req.params.id);
-  if (cd.data.game.id == req.params.id) { // FIXME: hardcoded single game id
+  if (cd.data.game.id === Number(req.params.id)) { // FIXME: hardcoded single game id
     var body = JSON.stringify(cd.data); // FIXME: multiple games?
     res.set('Content-Type', 'application/json');
     res.set('Content-Length', body.length);

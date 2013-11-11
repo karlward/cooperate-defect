@@ -4,20 +4,24 @@ var util = new Object();
 // return an array that has all unique values from array "a"
 var deduplicate = function(a){
   var seen = new Object();
-  for (i in a) {
+  var unique = new Array();
+  for (var i in a) {
     seen[a[i]]++;
   }
-  return Object.keys(seen);
+  for (var key in Object.keys(seen)) {
+    unique.push(Number(key));
+  }
+  return unique;
 }
 
-// does object "obj" contain item "a"? true/false
+// does object "a" contain item "obj"? true/false
 var contains = function(a, obj) {
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] == obj) {
-      return true;
-    }
+  if (a.indexOf(obj) !== -1) {
+    return true;
   }
-  return false;
+  else {
+    return false;
+  }
 }
 
 // return a random color, as an RGB hex string

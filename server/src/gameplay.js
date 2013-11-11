@@ -5,7 +5,7 @@ var util = require('./util');
 
 var updateFrame = function() {
   //if ((cd.data.orbs.length < 5) && (cd.data.orbs.length < cd.data.players.length - 1)) {
-  if(cd.data.game.running ===true){
+  if(cd.data.game.running === true){
     if (cd.data.orbs.length < 1) {
       createOrb();
     }
@@ -21,10 +21,11 @@ var updateFrame = function() {
 };
 
 var updateGroups = function() {
+  //console.log('in updateGroups');
   cd.data.links.forEach(function(link, linkIndex, links) {
     if(cd.data.groups.length <= 0){
       cd.data.groups.push({"players": [link.source.id, link.target.id]});     
-      // console.log("adding new group"); 
+      //console.log("adding new group"); 
     }
     else {
       cd.data.groups.forEach(function(group, groupIndex, groups) {
@@ -89,14 +90,14 @@ var updateLeaderBoard = function() {
   cd.data.players;
   cd.data.leaderBoard = [];
   //Because js passes vars by reference. KW if you have a better way of doing this im open to ideas.
-  for (i in cd.data.players) {
+  for (var i in cd.data.players) {
     playersCopy.push(cd.data.players[i]);
   }
 
   playersCopy.sort(util.sortBy("mass"));
 
   //clear the old leaderboard data
-  for(i in playersCopy) {
+  for(var i in playersCopy) {
     // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
     var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id, "name": playersCopy[i].name};
     cd.data.leaderBoard.push(newLeaderBoardItem);
@@ -199,33 +200,35 @@ var movePlayer = function(playerId, direction) {
 };
 
 var checkForLinks = function() {
-  // console.log("No. of Player : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
-  for (i in cd.data.players) {
-    for (j in cd.data.players) {
+  //console.log('in checkForLinks');
+  //console.log("Number of Players : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
+  for (var i in cd.data.players) {
+    for (var j in cd.data.players) {
       if (!!cd.data.players[i] && !!cd.data.players[j]) {
-        // console.log(cd.data.players[i].id +" : "+cd.data.players[j].id);
+        //console.log(cd.data.players[i].id + " : " +cd.data.players[j].id);
         if (cd.data.players[i].id !== cd.data.players[j].id){
           if ((findDistance(cd.data.players[i], cd.data.players[j]) >= 0) 
-              && (cd.data.players[i].state == 'cooperate' && cd.data.players[j].state == 'cooperate')) {
+              && ((cd.data.players[i].state === 'cooperate') && (cd.data.players[j].state === 'cooperate'))) {
             addLink(cd.data.players[i].id, cd.data.players[j].id);
           }
           else {
-            // console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
+            //console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
           }
         }  
       }
       else {
-        console.log("Some players id is null");
+        //console.log("Some players id is null");
       }
     }
   }  
 }
 
 var addLink = function(sourceId, targetId) {
-  if (hasLink(sourceId, targetId) == false) {
+  //console.log('in addLink');
+  if (hasLink(sourceId, targetId) === false) {
     var newLink = {
         "source": {
-          "id":cd.data.players[sourceId].id,
+          "id": cd.data.players[sourceId].id,
           "x": cd.data.players[sourceId].x,
           "y": cd.data.players[sourceId].y
         },
@@ -247,13 +250,13 @@ var removeLink = function(id) {
   var i = cd.data.links.length;
 
   //Remove from links
-  console.log("Checking for links to remove with id: " + id );
+  //console.log("Checking for links to remove with id: " + id );
   while(i--){
-    console.log("Checking index :" + i);
+    //console.log("Checking index :" + i);
     //if id is a link source remove that link
     if (cd.data.links[i].source.id === id) {
       //remove link object
-      console.log("Removing source link at index : " + i );
+      //console.log("Removing source link at index : " + i );
       cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
       cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
       cd.data.links.splice(i,1);
@@ -261,7 +264,7 @@ var removeLink = function(id) {
 
     //if id is a link target remove
     if (cd.data.links[i].target.id === id) {
-      console.log("Removing target link at index : " + i );
+      //console.log("Removing target link at index : " + i );
       cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
       cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
       cd.data.links.splice(i,1);
@@ -270,8 +273,17 @@ var removeLink = function(id) {
   //remove from groups
   cd.data.groups.forEach(function(element,index,array) {
     if (util.contains(element.players,id)) {
-      console.log("Removing player with id: " + id + " from group "+ element.players);
-      cd.data.groups.splice(index,1);
+      //console.log("Removing player with id: " + id + " from group "+ element.players);
+      for (j in element.players) {
+        if (element.players[j] === id) {
+          console.log('really removing element ' + element.players[j]);
+          element.players.splice(j, 1);
+        }
+      }
+      //cd.data.groups.splice(index,1);
+      if (array.length === 1) {
+        cd.data.groups.splice(index, 1);
+      }
     }
   });
 
@@ -282,21 +294,21 @@ var hasLink = function(id1,id2) {
   for (i in cd.data.links) {
     if (cd.data.links[i].source.id === id1) {
       if (cd.data.links[i].target.id === id2) {
+        //console.log("Link found between id: " + id1 + " and id: " + id2);
         return true;
-        console.log("Link found between id :" + id1 + " and id :" + id2);
       }
     }
   }
 
   for (j in cd.data.links) {
     if (cd.data.links[j].source.id === id2) {
-      if(cd.data.links[j].target.id == id1) {
-        console.log("Link found between id :" + id1 + " and id :" + id2);
+      if(cd.data.links[j].target.id === id1) {
+        //console.log("Link found between id: " + id1 + " and id: " + id2);
         return true;
       }
     }
   }
-  console.log("No Link found between id :" + id1 + " and id :" + id2);
+  //console.log("No Link found between id: " + id1 + " and id: " + id2);
   return false;
 }
 
