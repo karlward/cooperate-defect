@@ -8,6 +8,21 @@ var url = require('url');
 app.use(express.bodyParser());
 app.use(express.static(__dirname + '/../../browser/src'));
 server.listen(8000);
+var cd = require('./cd');
+
+//var currentTime = 0; // FIXME: global
+
+var util = require('./util');
+
+var gameplay = require('./gameplay');
+
+//TIMER STUFF
+setInterval(gameplay.updateFrame, 1000 / cd.data.screen.frameRate);
+setTimeout(gameplay.gameOver,cd.data.game["durationMS"]);
+setInterval(gameplay.updateCountdown,1000)
+
+//END TIMER STUFF
+
 
 //ROUTES
 app.get('/orbs/:id', function (req, res) {
