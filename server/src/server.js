@@ -77,18 +77,19 @@ app.get('/players\/?$', function(req, res) {
 //update movement and cooperate/defect status for a player
 app.patch('/players/:id', function(req, res) {
   //console.log('in patch for player ' + req.params.id);
-  if (!!cd.data.players[req.params.id]) {
+  var id = Number(req.params.id);
+  if (!!cd.data.players[id]) {
     //console.dir(req.body);
     if (!!req.body.state) {
       if ((req.body.state === 'cooperate') || (req.body.state === 'defect')) {
         //console.log('setting player ' + req.params.id + ' to state ' + req.body.state);
         cd.data.players[req.params.id].state = req.body.state;
-        console.log("State changed!" + cd.data.players[req.params.id].state);
+        console.log("State changed for player " + id + ": " + cd.data.players[id].state);
         if (req.body.state === 'cooperate') {
 
         }
         else if (req.body.state === 'defect') {
-          gameplay.removeLink(req.params.id);
+          gameplay.removeLink(id);
         }
       }
       else {
@@ -97,7 +98,7 @@ app.patch('/players/:id', function(req, res) {
       }
     }
     if (!!req.body.move && (req.body.move.match(/^(up|down|left|right)$/))) {
-      gameplay.movePlayer(req.params.id, req.body.move);
+      gameplay.movePlayer(id, req.body.move);
     }
   }
   else {

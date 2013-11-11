@@ -251,7 +251,21 @@ var removeLink = function(id) {
 
   //Remove from links
   //console.log("Checking for links to remove with id: " + id );
-  while(i--){
+  cd.data.links.forEach(function(link, linkIndex, links) {
+    if (link.source.id === id) {
+      cd.data.players[link.source.id].numberOfLinks--;
+      cd.data.players[link.target.id].numberOfLinks--;
+      links.splice(linkIndex, 1);
+    }
+    if (link.target.id === id) {
+      cd.data.players[link.source.id].numberOfLinks--;
+      cd.data.players[link.target.id].numberOfLinks--;
+      links.splice(linkIndex, 1);
+    }
+  });
+  
+  
+/*  while(i--){
     //console.log("Checking index :" + i);
     //if id is a link source remove that link
     if (cd.data.links[i].source.id === id) {
@@ -269,20 +283,22 @@ var removeLink = function(id) {
       cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
       cd.data.links.splice(i,1);
     }
-  }
+  } */
   //remove from groups
-  cd.data.groups.forEach(function(element,index,array) {
-    if (util.contains(element.players,id)) {
-      //console.log("Removing player with id: " + id + " from group "+ element.players);
-      for (j in element.players) {
-        if (element.players[j] === id) {
-          console.log('really removing element ' + element.players[j]);
-          element.players.splice(j, 1);
+  cd.data.groups.forEach(function(group, groupIndex, groups) {
+    //console.log('checking groups for link to remove');
+    if (util.contains(group.players,id)) {
+      console.log("Removing player with id: " + id + " from group "+ group.players);
+      for (var j in group.players) {
+        if (group.players[j] === id) {
+          console.log('really removing player ' + group.players[j]);
+          group.players.splice(j, 1);
         }
       }
       //cd.data.groups.splice(index,1);
-      if (array.length === 1) {
-        cd.data.groups.splice(index, 1);
+      if (groups.length === 1) {
+        console.log('removing single member group, members: ' + groups);
+        groups.splice(groupIndex, 1);
       }
     }
   });
@@ -291,7 +307,7 @@ var removeLink = function(id) {
 }
 
 var hasLink = function(id1,id2) {
-  for (i in cd.data.links) {
+  for (var i in cd.data.links) {
     if (cd.data.links[i].source.id === id1) {
       if (cd.data.links[i].target.id === id2) {
         //console.log("Link found between id: " + id1 + " and id: " + id2);
@@ -300,7 +316,7 @@ var hasLink = function(id1,id2) {
     }
   }
 
-  for (j in cd.data.links) {
+  for (var j in cd.data.links) {
     if (cd.data.links[j].source.id === id2) {
       if(cd.data.links[j].target.id === id1) {
         //console.log("Link found between id: " + id1 + " and id: " + id2);
