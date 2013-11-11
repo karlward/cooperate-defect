@@ -406,13 +406,14 @@ define(['util', 'cd'], function(util, cd) {
   }
 
   return {
-    "lineFunction": lineFunction,
+    "updateFrame": updateFrame,
     "initScreen": initScreen,
     "updateLeaderboard": updateLeaderboard,
     "updateBackground": updateBackground,
     "updatePlayer": updatePlayer,
     "updateLinks": updateLinks,
     "updateOrbs": updateOrbs,
+    "getGameData": getGameData,
     "gameOver": gameOver,
   };
 });

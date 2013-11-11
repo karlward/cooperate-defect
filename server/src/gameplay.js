@@ -247,7 +247,7 @@ var removeLink = function(id) {
   var i = cd.data.links.length;
 
   //Remove from links
-  console.log("Checking for links to remove with id :" + id );
+  console.log("Checking for links to remove with id: " + id );
   while(i--){
     console.log("Checking index :" + i);
     //if id is a link source remove that link
@@ -270,7 +270,7 @@ var removeLink = function(id) {
   //remove from groups
   cd.data.groups.forEach(function(element,index,array) {
     if (util.contains(element.players,id)) {
-      console.log("Removing player with id :" + id + "from group"+ element.players);
+      console.log("Removing player with id: " + id + " from group "+ element.players);
       cd.data.groups.splice(index,1);
     }
   });

@@ -5,8 +5,8 @@ var server = http.createServer(app);
 var url = require('url');
 
 //configure Express
-app.use(express.bodyParser())
-.use(express.static(__dirname + '/../../browser/src'));
+app.use(express.bodyParser());
+app.use(express.static(__dirname + '/../../browser/src'));
 server.listen(8000);
 
 var cd = require('./cd');
