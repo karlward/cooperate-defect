@@ -225,7 +225,7 @@ var ensureGrouped = function(a, b) {
         cd.data.groups[groupIndex].players.push(b);
         found = true;
       }
-      else if (util.contains(cd.data.groups[groupIndex].players, b)) {
+      if (util.contains(cd.data.groups[groupIndex].players, b)) {
         cd.data.groups[groupIndex].players.push(a);
         found = true;
       }
