@@ -11,7 +11,7 @@ if (!cd) {
   {
       "game": {
         "id": 1,
-        "durationMS": 180000,
+        "durationMS": 18000,
         "elapsedMS": 0,
         "running":true
       },

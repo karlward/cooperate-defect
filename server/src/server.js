@@ -130,7 +130,8 @@ app.post('/players\/?$', function(req, res) {
       "index": cd.data.players.length, 
       "color":newPlayer.color, 
       "playerId": newPlayer.id, 
-      "name": userName
+      "name": userName,
+      "mass" : 0
   };
     cd.data.leaderBoard.push(newLeaderBoardItem);
   console.log("New Player added !");

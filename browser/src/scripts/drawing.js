@@ -175,15 +175,6 @@ define(['util', 'cd'], function(util, cd) {
     .data(cd.data.leaderBoard);
     
     cd.d3leaderBoard
-        .attr("rect.leaderboard","update")
-        .transition()
-        .attr("x", 20)
-        .attr("y", function(d) { return ( (cd.data.leaderBoard.length - d.index)*20 +1); })
-        .attr("width",60)
-        .attr("height",20)
-        .attr("fill",function(d) { return (d.color); });
-    
-    cd.d3leaderBoard
     .enter()
     .append("rect")
     .attr("class","leaderboard")
@@ -194,32 +185,43 @@ define(['util', 'cd'], function(util, cd) {
     .attr("fill",function(d) { return (d.color); });
 
     cd.d3leaderBoard
+        .attr("rect.leaderboard","update")
+        .transition()
+        .attr("x", 20)
+        .attr("y", function(d) { return ( (cd.data.leaderBoard.length - d.index)*20 +1 ); })
+        .attr("width",60)
+        .attr("height",20)
+        .attr("fill",function(d) { return (d.color); });
+    
+    
+
+    cd.d3leaderBoard
     .exit()
     .remove(); 
 
-    cd.d3leaderBoardText = cd.scoreSvg.selectAll("text.playerID")
+    cd.d3leaderBoardText = cd.scoreSvg.selectAll("text.playerID")    
     .data(cd.data.leaderBoard);
 
-    cd.d3leaderBoardText
-    .attr("text.playerID","update")
-    .attr("x",30)
-    .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index) +30);})
-    .text(function(d){return d.name ; })
-    .attr("font-family", "sans-serif")
-    .attr("font-size", "10px")
-    .attr("fill", "black");
+        cd.d3leaderBoardText
+            .enter()
+            .append('text')
+            .attr("class","playerID")
+            .attr("x",30)
+            .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20+ 20 );})
+            .text(function(d){return d.name ; })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "10px")
+            .attr("fill", "black");      
 
-    cd.d3leaderBoardText
-    .enter()
-    .append('text')
-    .attr("class","playerID")
-    .attr("x",30)
-    .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20+ 30 );})
-    .text(function(d){return d.name ; })
-    .attr("font-family", "sans-serif")
-    .attr("font-size", "10px")
-    .attr("fill", "black");        
-
+            cd.d3leaderBoardText
+                .attr("text.playerID","update")
+                .attr("x",30)
+                .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 +20);})
+                .text(function(d){return d.name ; })
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "10px")
+                .attr("fill", "black");  
+    
     cd.d3leaderBoardText
     .exit()
     .remove();
@@ -402,7 +404,18 @@ define(['util', 'cd'], function(util, cd) {
     .text("Game Over!")
     .attr("font-family", "sans-serif")
     .attr("font-size", "12px")
-    .attr("fill", "red");        
+    .attr("fill", "red");       
+
+    cd.d3leaderBoardSCORE = cd.scoreSvg.selectAll("text.playerID")    
+    .data(cd.data.leaderBoard);
+    cd.d3leaderBoardSCORE
+            .attr("text.playerID","update")
+            .attr("x",30)
+            .attr("y",function(d){return ((cd.data.leaderBoard.length - d.index)*20 +20);})
+            .text(function(d){return d.name + " ----------------- "+ d.score  ; })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "10px")
+            .attr("fill", "black");    
   }
 
   return {

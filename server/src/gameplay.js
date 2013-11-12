@@ -89,7 +89,7 @@ var updateLeaderBoard = function() {
   //clear the old leaderboard data
   for(var i in playersCopy) {
     // console.log(playersCopy[i].id +" : "+playersCopy[i].score)
-    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id, "name": playersCopy[i].name};
+    var newLeaderBoardItem  = {"index": i, "color":playersCopy[i].color, "playerId": playersCopy[i].id, "name": playersCopy[i].name, "score": playersCopy[i].mass};
     cd.data.leaderBoard.push(newLeaderBoardItem);
   }
 }
