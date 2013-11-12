@@ -20,49 +20,6 @@ var updateFrame = function() {
   }
 };
 
-var linkAll = function(group) {
-  if (group.players.length > 1) {
-    group.players.forEach(function(p, pIndex, pArray) {
-      for (var compIndex in pArray) {
-        console.log('linking players ' + p + ' and ' + pArray[compIndex] + ', players: ');
-        console.dir(pArray);
-        addLink(p, pArray[compIndex]);
-      }
-    });
-  }
-};
-
-var updateGroups = function() { // FIXME: this is broken
-  //console.log('in updateGroups');
-  cd.data.links.forEach(function(link, linkIndex, links) {
-    if(cd.data.groups.length <= 0){
-      cd.data.groups.push({"players": [link.source.id, link.target.id]});     
-      //console.log("adding new group"); 
-    }
-    else {
-      cd.data.groups.forEach(function(group, groupIndex, groups) {
-        // console.log("Checking if: " + group.players + " contains "+ link.source);
-        if (util.contains(group.players, link.source.id)){
-          group.players.push(link.target.id);
-          //console.log("link id: " + link.target.id + " added to group as target"); 
-        }
-        else if (util.contains(group.players, link.target.id)) {
-          group.players.push(link.source.id);
-          //console.log("link id: " + link.source.id + "  added to group as source");
-        }
-        else {
-          groups.push({"players": [link.source.id, link.target.id]}); 
-          //console.log("link not found in current group adding new group");
-        }
-        group.players = util.deduplicate(group.players);
-        
-        // now link all group members to each other
-        linkAll(group);
-      });      
-    }
-  });
-}
-
 var updatePlayers = function() {
   cd.data.players.forEach(function (element, index, array) {
     var newX = element.x + element.xSpeed;
@@ -119,15 +76,27 @@ var updateLeaderBoard = function() {
   }
 }
 
-var updateLinks = function(){
-  cd.data.links.forEach(function(element, index, array) {
-    element.source.x = cd.data.players[element.source.id].x;
-    element.source.y = cd.data.players[element.source.id].y;
-    element.target.x = cd.data.players[element.target.id].x;
-    element.target.y = cd.data.players[element.target.id].y;
+var updateLinks = function() {
+  cd.data.groups.forEach(function(group, groupIndex, groups) {
+    group.players.forEach(function(player, playerIndex, players) {
+      // remove dead links
+/*      cd.data.players.forEach(function(allPlayer, allPlayerIndex, allPlayers) {
+        if (!util.contains(players, allPlayer)) {
+          removeLink(player, allPlayer);
+        }
+      }); */
+      for (var i = playerIndex + 1; i < players.length; i++) {
+        addLink(player, players[i]);
+      }
+    });
   });
-  checkForLinks();
-}
+  cd.data.links.forEach(function(link, linkIndex, links) {
+    link.source.x = cd.data.players[link.source.id].x;
+    link.source.y = cd.data.players[link.source.id].y;
+    link.target.x = cd.data.players[link.target.id].x;
+    link.target.y = cd.data.players[link.target.id].y;
+  });
+};
 
 var updateOrbs = function() {
   cd.data.orbs.forEach(function(orb, orbIndex, orbs) {
@@ -214,8 +183,8 @@ var movePlayer = function(playerId, direction) {
   }
 };
 
-var checkForLinks = function() {
-  //console.log('in checkForLinks');
+var updateGroups = function() {
+  //console.log('in updateGroups');
   //console.log("Number of Players : " + cd.data.players.length + " No. of links : "+ cd.data.links.length);
   for (var i in cd.data.players) {
     for (var j in cd.data.players) {
@@ -226,7 +195,8 @@ var checkForLinks = function() {
               && (cd.data.players[i].state === 'cooperate')
               && (cd.data.players[j].state === 'cooperate')
           ) {
-            addLink(cd.data.players[i].id, cd.data.players[j].id);
+            ensureGrouped(cd.data.players[i].id, cd.data.players[j].id);
+            //addLink(cd.data.players[i].id, cd.data.players[j].id);
           }
           else {
             //console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
@@ -239,6 +209,58 @@ var checkForLinks = function() {
     }
   }  
 }
+
+var ensureGrouped = function(a, b) {
+  console.log('in ensureGrouped for ' + a + ', ' + b);
+  var found = false;
+  if (cd.data.groups.length === 0) { // no groups at all, create a new group
+    var newGroup = new Object();
+    newGroup.players = [a, b];
+    //newGroup.players.push(a, b);
+    //newGroup.players.push(b);
+    cd.data.groups.push(newGroup);
+    found = true;
+  }
+  else { // look for an existing group
+    for (var groupIndex in cd.data.groups) {
+      if (util.contains(cd.data.groups[groupIndex].players, a)) {
+        cd.data.groups[groupIndex].players.push(b);
+        found = true;
+      }
+      else if (util.contains(cd.data.groups[groupIndex].players, b)) {
+        cd.data.groups[groupIndex].players.push(a);
+        found = true;
+      }
+      cd.data.groups[groupIndex].players = util.deduplicate(cd.data.groups[groupIndex].players);
+      console.log('group is now ');
+      console.dir(cd.data.groups[groupIndex].players);
+    }
+  }
+  if (found === false) { // create a new group
+    var newGroup = new Object();
+    newGroup.players = [a, b];
+    //newGroup.players.push(a, b);
+    //newGroup.players.push(b);
+    cd.data.groups.push(newGroup);
+  }
+};
+
+var ensureUngrouped = function(a) {
+  console.log('in ensureUngrouped for ' + a);
+  for (var groupIndex in cd.data.groups) {
+    for (var playerIndex in cd.data.groups[groupIndex].players) {
+      if (a === cd.data.groups[groupIndex].players[playerIndex]) {
+        cd.data.groups[groupIndex].players.splice(playerIndex, 1); // remove player from group
+        if (cd.data.groups[groupIndex].players.length <= 1) {
+          cd.data.groups.splice(groupIndex, 1); // remove group entirely
+        }
+      }
+    }
+  }
+  removeLink(a);
+//  console.log('group is now ');
+//  console.dir(cd.data.groups[groupIndex].players);
+};
 
 var addLink = function(sourceId, targetId) {
   //console.log('in addLink');
@@ -267,43 +289,19 @@ var addLink = function(sourceId, targetId) {
 }
 
 var removeLink = function(id) {
-  //var i = cd.data.links.length;
-
   //Remove from links
   //console.log("Checking for links to remove with id: " + id );
-  cd.data.links.forEach(function(link, linkIndex, links) {
-    if (link.source.id === id) {
-      cd.data.players[link.source.id].numberOfLinks--;
-      cd.data.players[link.target.id].numberOfLinks--;
-      links.splice(linkIndex, 1);
+  //cd.data.links.forEach(function(link, linkIndex, links) {
+  var linkIndex = 0;
+  for (var linkIndex = 0; linkIndex < cd.data.links.length; linkIndex++) {
+    if ((cd.data.links[linkIndex].source.id === id) || (cd.data.links[linkIndex].target.id === id)) {
+      cd.data.players[cd.data.links[linkIndex].source.id].numberOfLinks--;
+      cd.data.players[cd.data.links[linkIndex].target.id].numberOfLinks--;
+      cd.data.links.splice(linkIndex, 1); // FIXME: does this affect linkIndex in other loop iterations?
+      linkIndex--;
     }
-    if (link.target.id === id) {
-      cd.data.players[link.source.id].numberOfLinks--;
-      cd.data.players[link.target.id].numberOfLinks--;
-      links.splice(linkIndex, 1);
-    }
-  });
-
-  //remove from groups
-  cd.data.groups.forEach(function(group, groupIndex, groups) {
-    //console.log('checking groups for link to remove');
-    if (util.contains(group.players,id)) {
-      console.log("Removing player with id: " + id + " from group "+ group.players);
-      for (var j in group.players) {
-        if (group.players[j] === id) {
-          console.log('really removing player ' + group.players[j]);
-          group.players.splice(j, 1);
-        }
-      }
-      //cd.data.groups.splice(index,1);
-      if (groups.length === 1) {
-        console.log('removing single member group, members: ' + groups);
-        groups.splice(groupIndex, 1);
-      }
-    }
-  });
-
-  console.log("Done Checking");
+  }
+  //console.log("Done Checking");
 }
 
 var hasLink = function(id1,id2) {
@@ -326,7 +324,7 @@ var hasLink = function(id1,id2) {
   }
   //console.log("No Link found between id: " + id1 + " and id: " + id2);
   return false;
-}
+};
 
 //find distance between two objects, return distance in pixels
 //if return value is 0, objects are touching
@@ -366,12 +364,13 @@ gameplay = {
   "gameOver": gameOver,
   "updateCountdown": updateCountdown,
   "movePlayer": movePlayer,
-  "checkForLinks": checkForLinks,
   "addLink": addLink,
   "removeLink": removeLink,
   "hasLink": hasLink,
   "findDistance": findDistance,
   "createOrb": createOrb,
+  "ensureGrouped": ensureGrouped,
+  "ensureUngrouped": ensureUngrouped
 };
 
 module.exports = gameplay;

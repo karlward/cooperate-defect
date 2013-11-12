@@ -88,7 +88,7 @@ app.patch('/players/:id', function(req, res) {
 
         }
         else if (req.body.state === 'defect') {
-          gameplay.removeLink(id);
+          gameplay.ensureUngrouped(id);
         }
       }
       else {

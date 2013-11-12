@@ -3,14 +3,16 @@ var util = new Object();
 
 // return an array that has all unique values from array "a"
 var deduplicate = function(a){
-  var seen = new Object();
   var unique = new Array();
   for (var i in a) {
-    seen[a[i]]++;
+    if (!util.contains(unique, a[i])) {
+      unique.push(a[i]);
+    }  
   }
-  for (var key in Object.keys(seen)) {
-    unique.push(Number(key));
-  }
+  console.log('deduplicate from: ');
+  console.dir(a);
+  console.log('deduplicate to: ');
+  console.dir(unique);
   return unique;
 }
 
