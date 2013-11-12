@@ -233,6 +233,7 @@ var ensureGrouped = function(a, b) {
       console.log('group is now ');
       console.dir(cd.data.groups[groupIndex].players);
     }
+    // FIXME: combine any overlapping groups here
   }
   if (found === false) { // create a new group
     var newGroup = new Object();
