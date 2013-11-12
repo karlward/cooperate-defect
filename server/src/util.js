@@ -9,10 +9,10 @@ var deduplicate = function(a){
       unique.push(a[i]);
     }  
   }
-  console.log('deduplicate from: ');
+  /*console.log('deduplicate from: ');
   console.dir(a);
   console.log('deduplicate to: ');
-  console.dir(unique);
+  console.dir(unique);*/
   return unique;
 }
 

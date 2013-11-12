@@ -216,8 +216,6 @@ var ensureGrouped = function(a, b) {
   if (cd.data.groups.length === 0) { // no groups at all, create a new group
     var newGroup = new Object();
     newGroup.players = [a, b];
-    //newGroup.players.push(a, b);
-    //newGroup.players.push(b);
     cd.data.groups.push(newGroup);
     found = true;
   }
@@ -239,8 +237,6 @@ var ensureGrouped = function(a, b) {
   if (found === false) { // create a new group
     var newGroup = new Object();
     newGroup.players = [a, b];
-    //newGroup.players.push(a, b);
-    //newGroup.players.push(b);
     cd.data.groups.push(newGroup);
   }
 };
