@@ -21,54 +21,74 @@ var updateFrame = function() {
 };
 
 var updatePlayers = function() {
-  cd.data.players.forEach(function (element, index, array) {
-    var newX = element.x + element.xSpeed;
+  cd.data.players.forEach(function (player, index, players) {
+    var newX = player.x + player.xSpeed;
     if (newX < 0) {
       newX = 0;
     }
     else if (newX > cd.data.screen.width) {
       newX = cd.data.screen.width;
     }
-    element.x = newX;
+    player.x = newX;
 
-    var newY = element.y + element.ySpeed;
+    var newY = player.y + player.ySpeed;
     if (newY < 0) {
       newY = 0;
     }
     else if (newY > cd.data.screen.height) {
       newY = cd.data.screen.height;
     }
-    element.y = newY;
+    player.y = newY;
 
     // deceleration based on mass and current speed
-    if (element.xSpeed > 0) {
-      element.xSpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass); // slow yo roll dawg
+    if (player.xSpeed > 0) {
+      player.xSpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + player.xSpeed) / player.mass); // slow yo roll dawg
     }
-    else if (element.xSpeed < 0) {
-      element.xSpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);  // slow yo negative roll
+    else if (player.xSpeed < 0) {
+      player.xSpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + player.xSpeed) / player.mass);  // slow yo negative roll
     }
 
-    if (element.ySpeed > 0) {
-      element.ySpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
+    if (player.ySpeed > 0) {
+      player.ySpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + player.xSpeed) / player.mass);
     }
-    else if (element.ySpeed < 0) {
-      element.ySpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
+    else if (player.ySpeed < 0) {
+      player.ySpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + player.xSpeed) / player.mass);
     }
-    for (var i in array) { // non-overlapping player code, not perfect
-      if (element !== array[i]) {
-        if(findDistance(element, array[i]) > 4) {
-          if (element.mass < array[i].mass) {
-            element.x += array[i].xSpeed * (array[i].mass / element.mass);
-            element.y += array[i].ySpeed * (array[i].mass / element.mass);
+    for (var i in players) { // non-overlapping player code, not perfect
+      if (player !== players[i]) {
+        if(findDistance(player, players[i]) > 4) {
+          if (player.mass < players[i].mass) {
+            player.x += players[i].xSpeed * (players[i].mass / player.mass);
+            player.y += players[i].ySpeed * (players[i].mass / player.mass);
           }
-          else if (element.mass > array[i].mass) {
-            array[i].x += element.xSpeed * (element.mass / array[i].mass);
-            array[i].y += element.ySpeed * (element.mass / array[i].mass);
+          else if (player.mass > players[i].mass) {
+            players[i].x += player.xSpeed * (player.mass / players[i].mass);
+            players[i].y += player.ySpeed * (player.mass / players[i].mass);
           }
           else {
-            array[i].x += element.xSpeed;
-            element.y += array[i].ySpeed;
+            players[i].x += player.xSpeed;
+            player.y += players[i].ySpeed;
           }
+        }
+        else if (hasLink(player.id, players[i].id) && (findDistance(player, players[i]) < -150)) {
+          var totalMass = players[i].mass + player.mass;
+          var xSpeed1 = player.xSpeed;
+          var ySpeed1 = player.ySpeed;
+          var xSpeed2 = players[i].xSpeed;
+          var ySpeed2 = players[i].ySpeed;
+          
+          player.xSpeed = (xSpeed1 / totalMass) + (xSpeed2 / totalMass);
+          player.ySpeed = (ySpeed1 / totalMass) + (ySpeed2 / totalMass);
+          players[i].xSpeed = (xSpeed1 / totalMass) + (xSpeed2 / totalMass);
+          players[i].ySpeed = (ySpeed1 / totalMass) + (ySpeed2 / totalMass);
+          /*if (player.mass < players[i].mass) {
+            player.x += player.xSpeed + (players[i].xSpeed * (players[i].mass / (players[i].mass + player.mass)));
+            player.y += player.ySpeed + (players[i].ySpeed * (players[i].mass / (players[i].mass + player.mass)));
+          }
+          else if (player.mass > players[i].mass) {
+            players[i].x += player.xSpeed * (player.mass / players[i].mass);
+            players[i].y += player.ySpeed * (player.mass / players[i].mass);
+          }*/
         }
       }
     }
