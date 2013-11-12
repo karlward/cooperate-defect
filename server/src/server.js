@@ -8,7 +8,6 @@ var url = require('url');
 app.use(express.bodyParser());
 app.use(express.static(__dirname + '/../../browser/src'));
 server.listen(8000);
-
 var cd = require('./cd');
 
 //var currentTime = 0; // FIXME: global
