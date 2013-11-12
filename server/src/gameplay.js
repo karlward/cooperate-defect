@@ -56,39 +56,58 @@ var updatePlayers = function() {
     }
     for (var i in players) { // non-overlapping player code, not perfect
       if (player !== players[i]) {
-        if(findDistance(player, players[i]) > 4) {
-          if (player.mass < players[i].mass) {
-            player.x += players[i].xSpeed * (players[i].mass / player.mass);
-            player.y += players[i].ySpeed * (players[i].mass / player.mass);
-          }
-          else if (player.mass > players[i].mass) {
-            players[i].x += player.xSpeed * (player.mass / players[i].mass);
-            players[i].y += player.ySpeed * (player.mass / players[i].mass);
-          }
-          else {
-            players[i].x += player.xSpeed;
-            player.y += players[i].ySpeed;
+        if(findDistance(player, players[i]) >= 0) {
+          ensureGrouped(player.id, players[i].id);
+          while(findDistance(player, players[i]) >= 0) { // push them apart
+            if (player.mass < players[i].mass) {
+              player.x += players[i].xSpeed * (players[i].mass / player.mass);
+              player.y += players[i].ySpeed * (players[i].mass / player.mass);
+            }
+            else if (player.mass > players[i].mass) {
+              players[i].x += player.xSpeed * (player.mass / players[i].mass);
+              players[i].y += player.ySpeed * (player.mass / players[i].mass);
+            }
+            else {
+              players[i].x += player.xSpeed;
+              player.y += players[i].ySpeed;
+            }
           }
         }
         else if (hasLink(player.id, players[i].id) && (findDistance(player, players[i]) < -150)) {
           var totalMass = players[i].mass + player.mass;
-          var xSpeed1 = player.xSpeed;
-          var ySpeed1 = player.ySpeed;
-          var xSpeed2 = players[i].xSpeed;
-          var ySpeed2 = players[i].ySpeed;
+          var xSpeedGroup = (player.xSpeed * player.mass / totalMass) + (players[i].xSpeed * players[i].mass / totalMass);
+          var ySpeedGroup = (player.ySpeed * player.mass / totalMass) + (players[i].ySpeed * players[i].mass / totalMass);
           
-          player.xSpeed = (xSpeed1 / totalMass) + (xSpeed2 / totalMass);
-          player.ySpeed = (ySpeed1 / totalMass) + (ySpeed2 / totalMass);
-          players[i].xSpeed = (xSpeed1 / totalMass) + (xSpeed2 / totalMass);
-          players[i].ySpeed = (ySpeed1 / totalMass) + (ySpeed2 / totalMass);
-          /*if (player.mass < players[i].mass) {
-            player.x += player.xSpeed + (players[i].xSpeed * (players[i].mass / (players[i].mass + player.mass)));
-            player.y += player.ySpeed + (players[i].ySpeed * (players[i].mass / (players[i].mass + player.mass)));
-          }
-          else if (player.mass > players[i].mass) {
-            players[i].x += player.xSpeed * (player.mass / players[i].mass);
-            players[i].y += player.ySpeed * (player.mass / players[i].mass);
-          }*/
+/*          player.xSpeed = xSpeedGroup;
+          player.ySpeed = ySpeedGroup;
+          players[i].xSpeed = xSpeedGroup;
+          players[i].ySpeed = ySpeedGroup;*/
+         // while (findDistance(player, players[i]) < -150) {
+            var newX1 = player.x + player.xSpeed;
+            var newY1 = player.y + player.ySpeed;
+            var newX2 = players[i].x + players[i].xSpeed;
+            var newY2 = players[i].y + players[i].ySpeed;
+            if (Math.abs(player.x - players[i].x) < Math.abs(newX1 - newX2)) { // check x direction
+              player.x += xSpeedGroup + Math.random();
+              players[i].x += xSpeedGroup + Math.random();
+              player.xSpeed = xSpeedGroup + Math.random();
+              players[i].xSpeed = xSpeedGroup + Math.random();
+            }
+            else {
+              player.x += player.xSpeed;
+              players[i].x += players[i].xSpeed;
+            }
+            if (Math.abs(player.y - players[i].y) < Math.abs(newY1 - newY2)) { // check y direction
+              player.y += ySpeedGroup + Math.random();
+              players[i].y += ySpeedGroup + Math.random();
+              player.ySpeed = ySpeedGroup + Math.random();
+              players[i].ySpeed = ySpeedGroup + Math.random();
+            }
+            else {
+              player.y += player.ySpeed;
+              players[i].y += players[i].ySpeed;
+            }
+        //  }
         }
       }
     }
@@ -242,7 +261,7 @@ var updateGroups = function() {
 }
 
 var ensureGrouped = function(a, b) {
-  console.log('in ensureGrouped for ' + a + ', ' + b);
+  //console.log('in ensureGrouped for ' + a + ', ' + b);
   var found = false;
   if (cd.data.groups.length === 0) { // no groups at all, create a new group
     var newGroup = new Object();
@@ -261,8 +280,8 @@ var ensureGrouped = function(a, b) {
         found = true;
       }
       cd.data.groups[groupIndex].players = util.deduplicate(cd.data.groups[groupIndex].players);
-      console.log('group is now ');
-      console.dir(cd.data.groups[groupIndex].players);
+      //console.log('group is now ');
+      //console.dir(cd.data.groups[groupIndex].players);
     }
     // FIXME: combine any overlapping groups here
   }
