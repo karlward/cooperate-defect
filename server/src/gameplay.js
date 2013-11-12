@@ -54,6 +54,24 @@ var updatePlayers = function() {
     else if (element.ySpeed < 0) {
       element.ySpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
     }
+    for (var i in array) { // non-overlapping player code, not perfect
+      if (element !== array[i]) {
+        if(findDistance(element, array[i]) > 4) {
+          if (element.mass < array[i].mass) {
+            element.x += array[i].xSpeed * (array[i].mass / element.mass);
+            element.y += array[i].ySpeed * (array[i].mass / element.mass);
+          }
+          else if (element.mass > array[i].mass) {
+            array[i].x += element.xSpeed * (element.mass / array[i].mass);
+            array[i].y += element.ySpeed * (element.mass / array[i].mass);
+          }
+          else {
+            array[i].x += element.xSpeed;
+            element.y += array[i].ySpeed;
+          }
+        }
+      }
+    }
   });
 };
 
@@ -190,21 +208,6 @@ var updateGroups = function() {
               && (cd.data.players[j].state === 'cooperate')
           ) {
             ensureGrouped(cd.data.players[i].id, cd.data.players[j].id);
-              while(findDistance(cd.data.players[i], cd.data.players[j]) >= 0) {
-                if (cd.data.players[i].mass < cd.data.players[j].mass) {
-                  cd.data.players[i].x += cd.data.players[j].xSpeed;
-                  cd.data.players[i].y += cd.data.players[j].ySpeed;
-                }
-                else if (cd.data.players[i].mass > cd.data.players[j].mass) {
-                  cd.data.players[j].x += cd.data.players[i].xSpeed;
-                  cd.data.players[j].y += cd.data.players[i].ySpeed;
-                }
-                else {
-                  cd.data.players[j].x += cd.data.players[i].xSpeed;
-                  cd.data.players[i].y += cd.data.players[j].ySpeed;
-                }
-            }
-            
           }
           else {
             //console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
