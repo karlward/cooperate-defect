@@ -20,7 +20,19 @@ var updateFrame = function() {
   }
 };
 
-var updateGroups = function() {
+var linkAll = function(group) {
+  if (group.players.length > 1) {
+    group.players.forEach(function(p, pIndex, pArray) {
+      for (var compIndex in pArray) {
+        console.log('linking players ' + p + ' and ' + pArray[compIndex] + ', players: ');
+        console.dir(pArray);
+        addLink(p, pArray[compIndex]);
+      }
+    });
+  }
+};
+
+var updateGroups = function() { // FIXME: this is broken
   //console.log('in updateGroups');
   cd.data.links.forEach(function(link, linkIndex, links) {
     if(cd.data.groups.length <= 0){
@@ -43,6 +55,9 @@ var updateGroups = function() {
           //console.log("link not found in current group adding new group");
         }
         group.players = util.deduplicate(group.players);
+        
+        // now link all group members to each other
+        linkAll(group);
       });      
     }
   });
@@ -207,8 +222,10 @@ var checkForLinks = function() {
       if (!!cd.data.players[i] && !!cd.data.players[j]) {
         //console.log(cd.data.players[i].id + " : " +cd.data.players[j].id);
         if (cd.data.players[i].id !== cd.data.players[j].id){
-          if ((findDistance(cd.data.players[i], cd.data.players[j]) >= 0) 
-              && ((cd.data.players[i].state === 'cooperate') && (cd.data.players[j].state === 'cooperate'))) {
+          if ((findDistance(cd.data.players[i], cd.data.players[j]) >= 0)
+              && (cd.data.players[i].state === 'cooperate')
+              && (cd.data.players[j].state === 'cooperate')
+          ) {
             addLink(cd.data.players[i].id, cd.data.players[j].id);
           }
           else {
@@ -225,7 +242,10 @@ var checkForLinks = function() {
 
 var addLink = function(sourceId, targetId) {
   //console.log('in addLink');
-  if (hasLink(sourceId, targetId) === false) {
+  if ((sourceId !== targetId)
+      && (hasLink(sourceId, targetId) === false)
+      && (cd.data.players[sourceId].state === 'cooperate')
+      && (cd.data.players[targetId].state === 'cooperate')) {
     var newLink = {
         "source": {
           "id": cd.data.players[sourceId].id,
@@ -247,7 +267,7 @@ var addLink = function(sourceId, targetId) {
 }
 
 var removeLink = function(id) {
-  var i = cd.data.links.length;
+  //var i = cd.data.links.length;
 
   //Remove from links
   //console.log("Checking for links to remove with id: " + id );
@@ -263,27 +283,7 @@ var removeLink = function(id) {
       links.splice(linkIndex, 1);
     }
   });
-  
-  
-/*  while(i--){
-    //console.log("Checking index :" + i);
-    //if id is a link source remove that link
-    if (cd.data.links[i].source.id === id) {
-      //remove link object
-      //console.log("Removing source link at index : " + i );
-      cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
-      cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
-      cd.data.links.splice(i,1);
-    } 
 
-    //if id is a link target remove
-    if (cd.data.links[i].target.id === id) {
-      //console.log("Removing target link at index : " + i );
-      cd.data.players[cd.data.links[i].source.id].numberOfLinks--; 
-      cd.data.players[cd.data.links[i].target.id].numberOfLinks--;
-      cd.data.links.splice(i,1);
-    }
-  } */
   //remove from groups
   cd.data.groups.forEach(function(group, groupIndex, groups) {
     //console.log('checking groups for link to remove');
