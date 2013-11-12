@@ -79,13 +79,7 @@ var updateLeaderBoard = function() {
 var updateLinks = function() {
   cd.data.groups.forEach(function(group, groupIndex, groups) {
     group.players.forEach(function(player, playerIndex, players) {
-      // remove dead links
-/*      cd.data.players.forEach(function(allPlayer, allPlayerIndex, allPlayers) {
-        if (!util.contains(players, allPlayer)) {
-          removeLink(player, allPlayer);
-        }
-      }); */
-      for (var i = playerIndex + 1; i < players.length; i++) {
+      for (var i = 0; i < players.length; i++) {
         addLink(player, players[i]);
       }
     });
