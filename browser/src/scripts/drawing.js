@@ -173,22 +173,22 @@ define(['util', 'cd'], function(util, cd) {
   var updateLeaderboard = function(){
     cd.d3leaderBoard = cd.scoreSvg.selectAll("rect.leaderboard")
     .data(cd.data.leaderBoard);
-
+    
+    cd.d3leaderBoard
+        .attr("rect.leaderboard","update")
+        .transition()
+        .attr("x", 20)
+        .attr("y", function(d) { return ( (cd.data.leaderBoard.length - d.index)*20 +1); })
+        .attr("width",60)
+        .attr("height",20)
+        .attr("fill",function(d) { return (d.color); });
+    
     cd.d3leaderBoard
     .enter()
     .append("rect")
     .attr("class","leaderboard")
     .attr("x", 20)
     .attr("y", function(d) { return (  (cd.data.leaderBoard.length - d.index)* 20 ); })
-    .attr("width",60)
-    .attr("height",20)
-    .attr("fill",function(d) { return (d.color); });
-
-    cd.d3leaderBoard
-    .attr("rect.leaderboard","update")
-    .transition()
-    .attr("x", 20)
-    .attr("y", function(d) { return ( (cd.data.leaderBoard.length - d.index)*20 ); })
     .attr("width",60)
     .attr("height",20)
     .attr("fill",function(d) { return (d.color); });

@@ -125,6 +125,14 @@ app.post('/players\/?$', function(req, res) {
       "currentRank":cd.data.players.length,
       "numberOfLinks": 0,
   };
+
+  var newLeaderBoardItem  = {
+      "index": cd.data.players.length, 
+      "color":newPlayer.color, 
+      "playerId": newPlayer.id, 
+      "name": userName
+  };
+    cd.data.leaderBoard.push(newLeaderBoardItem);
   console.log("New Player added !");
   cd.data.players.push(newPlayer);
   body = JSON.stringify(cd.data.players[newPlayer.id]);
@@ -155,12 +163,13 @@ app.get('/games', function(req, res) {
 
 var userName= null; // FIXME: is this necessary?
 app.get('/form_action.asp', function(req, res) { // FIXME: rename route, consider replacement with static file or SPA
-  // res.writeHead(200, {"Content-Type":"text/plain"});
+  // res.writeHead(, {"Content-Type":"text/plain"});
 
   var params = url.parse(req.url,true).query;
   userName= params["id"];
   console.log(params);
-  res.sendfile(__dirname + '/index.html');
+  // res.sendfile(__dirname + '/game.html');
+  res.redirect('/game.html');
 });
 
 //END ROUTES
