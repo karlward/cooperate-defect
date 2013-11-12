@@ -21,54 +21,93 @@ var updateFrame = function() {
 };
 
 var updatePlayers = function() {
-  cd.data.players.forEach(function (element, index, array) {
-    var newX = element.x + element.xSpeed;
+  cd.data.players.forEach(function (player, index, players) {
+    var newX = player.x + player.xSpeed;
     if (newX < 0) {
       newX = 0;
     }
     else if (newX > cd.data.screen.width) {
       newX = cd.data.screen.width;
     }
-    element.x = newX;
+    player.x = newX;
 
-    var newY = element.y + element.ySpeed;
+    var newY = player.y + player.ySpeed;
     if (newY < 0) {
       newY = 0;
     }
     else if (newY > cd.data.screen.height) {
       newY = cd.data.screen.height;
     }
-    element.y = newY;
+    player.y = newY;
 
     // deceleration based on mass and current speed
-    if (element.xSpeed > 0) {
-      element.xSpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass); // slow yo roll dawg
+    if (player.xSpeed > 0) {
+      player.xSpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + player.xSpeed) / player.mass); // slow yo roll dawg
     }
-    else if (element.xSpeed < 0) {
-      element.xSpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);  // slow yo negative roll
+    else if (player.xSpeed < 0) {
+      player.xSpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + player.xSpeed) / player.mass);  // slow yo negative roll
     }
 
-    if (element.ySpeed > 0) {
-      element.ySpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
+    if (player.ySpeed > 0) {
+      player.ySpeed -= cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + player.xSpeed) / player.mass);
     }
-    else if (element.ySpeed < 0) {
-      element.ySpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + element.xSpeed) / element.mass);
+    else if (player.ySpeed < 0) {
+      player.ySpeed += cd.data.screen.frameRate/10 + ((cd.data.screen.frameRate + player.xSpeed) / player.mass);
     }
-    for (var i in array) { // non-overlapping player code, not perfect
-      if (element !== array[i]) {
-        if(findDistance(element, array[i]) > 4) {
-          if (element.mass < array[i].mass) {
-            element.x += array[i].xSpeed * (array[i].mass / element.mass);
-            element.y += array[i].ySpeed * (array[i].mass / element.mass);
+    for (var i in players) { // non-overlapping player code, not perfect
+      if (player !== players[i]) {
+        if(findDistance(player, players[i]) >= 0) {
+          ensureGrouped(player.id, players[i].id);
+          while(findDistance(player, players[i]) >= 0) { // push them apart
+            if (player.mass < players[i].mass) {
+              player.x += players[i].xSpeed * (players[i].mass / player.mass);
+              player.y += players[i].ySpeed * (players[i].mass / player.mass);
+            }
+            else if (player.mass > players[i].mass) {
+              players[i].x += player.xSpeed * (player.mass / players[i].mass);
+              players[i].y += player.ySpeed * (player.mass / players[i].mass);
+            }
+            else {
+              players[i].x += player.xSpeed;
+              player.y += players[i].ySpeed;
+            }
           }
-          else if (element.mass > array[i].mass) {
-            array[i].x += element.xSpeed * (element.mass / array[i].mass);
-            array[i].y += element.ySpeed * (element.mass / array[i].mass);
-          }
-          else {
-            array[i].x += element.xSpeed;
-            element.y += array[i].ySpeed;
-          }
+        }
+        else if (hasLink(player.id, players[i].id) && (findDistance(player, players[i]) < -150)) {
+          var totalMass = players[i].mass + player.mass;
+          var xSpeedGroup = (player.xSpeed * player.mass / totalMass) + (players[i].xSpeed * players[i].mass / totalMass);
+          var ySpeedGroup = (player.ySpeed * player.mass / totalMass) + (players[i].ySpeed * players[i].mass / totalMass);
+          
+/*          player.xSpeed = xSpeedGroup;
+          player.ySpeed = ySpeedGroup;
+          players[i].xSpeed = xSpeedGroup;
+          players[i].ySpeed = ySpeedGroup;*/
+         // while (findDistance(player, players[i]) < -150) {
+            var newX1 = player.x + player.xSpeed;
+            var newY1 = player.y + player.ySpeed;
+            var newX2 = players[i].x + players[i].xSpeed;
+            var newY2 = players[i].y + players[i].ySpeed;
+            if (Math.abs(player.x - players[i].x) < Math.abs(newX1 - newX2)) { // check x direction
+              player.x += xSpeedGroup + Math.random();
+              players[i].x += xSpeedGroup + Math.random();
+              player.xSpeed = xSpeedGroup + Math.random();
+              players[i].xSpeed = xSpeedGroup + Math.random();
+            }
+            else {
+              player.x += player.xSpeed;
+              players[i].x += players[i].xSpeed;
+            }
+            if (Math.abs(player.y - players[i].y) < Math.abs(newY1 - newY2)) { // check y direction
+              player.y += ySpeedGroup + Math.random();
+              players[i].y += ySpeedGroup + Math.random();
+              player.ySpeed = ySpeedGroup + Math.random();
+              players[i].ySpeed = ySpeedGroup + Math.random();
+            }
+            else {
+              player.y += player.ySpeed;
+              players[i].y += players[i].ySpeed;
+            }
+        //  }
         }
       }
     }
@@ -222,7 +261,7 @@ var updateGroups = function() {
 }
 
 var ensureGrouped = function(a, b) {
-  console.log('in ensureGrouped for ' + a + ', ' + b);
+  //console.log('in ensureGrouped for ' + a + ', ' + b);
   var found = false;
   if (cd.data.groups.length === 0) { // no groups at all, create a new group
     var newGroup = new Object();
@@ -241,8 +280,8 @@ var ensureGrouped = function(a, b) {
         found = true;
       }
       cd.data.groups[groupIndex].players = util.deduplicate(cd.data.groups[groupIndex].players);
-      console.log('group is now ');
-      console.dir(cd.data.groups[groupIndex].players);
+      //console.log('group is now ');
+      //console.dir(cd.data.groups[groupIndex].players);
     }
     // FIXME: combine any overlapping groups here
   }

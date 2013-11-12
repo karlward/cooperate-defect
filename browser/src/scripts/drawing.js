@@ -146,7 +146,14 @@ define(['util', 'cd'], function(util, cd) {
     .attr('fill', function(d) {
       return d.color;
     })
-    .attr('stroke', 'black');
+    .attr('stroke', function(d) {
+      if (d.state === 'cooperate') {
+        return '#00ff00';
+      }
+      else {
+        return '#ff0000';
+      }
+    });
 
     // store d3 elements for players in a convenient variable
     cd.d3orbs = cd.svg.selectAll('circle.orb')
@@ -283,8 +290,15 @@ define(['util', 'cd'], function(util, cd) {
     .attr('fill', function(d) {
       return d.color;
     })
-    .attr('stroke', 'black');
-
+    .attr('stroke', function(d) {
+      if (d.state === 'cooperate') {
+        return '#00ff00';
+      }
+      else {
+        return '#ff0000';
+      }
+    });
+    
     cd.d3players // remove any players that don't exist in the data anymore
     .exit()
     .transition() // we're going to fade them out
@@ -305,7 +319,14 @@ define(['util', 'cd'], function(util, cd) {
     .attr('fill', function(d) {
       return d.color;
     })
-    .attr('stroke', 'black');    
+    .attr('stroke', function(d) {
+      if (d.state === 'cooperate') {
+        return '#00ff00';
+      }
+      else {
+        return '#ff0000';
+      }
+    });
   }
 
   var updateLinks = function(){
