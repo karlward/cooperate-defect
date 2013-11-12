@@ -190,7 +190,21 @@ var updateGroups = function() {
               && (cd.data.players[j].state === 'cooperate')
           ) {
             ensureGrouped(cd.data.players[i].id, cd.data.players[j].id);
-            //addLink(cd.data.players[i].id, cd.data.players[j].id);
+              while(findDistance(cd.data.players[i], cd.data.players[j]) >= 0) {
+                if (cd.data.players[i].mass < cd.data.players[j].mass) {
+                  cd.data.players[i].x += cd.data.players[j].xSpeed;
+                  cd.data.players[i].y += cd.data.players[j].ySpeed;
+                }
+                else if (cd.data.players[i].mass > cd.data.players[j].mass) {
+                  cd.data.players[j].x += cd.data.players[i].xSpeed;
+                  cd.data.players[j].y += cd.data.players[i].ySpeed;
+                }
+                else {
+                  cd.data.players[j].x += cd.data.players[i].xSpeed;
+                  cd.data.players[i].y += cd.data.players[j].ySpeed;
+                }
+            }
+            
           }
           else {
             //console.log("Link ignored. Current state of players : " + cd.data.players[i].state + " , "+ cd.data.players[j].state);
