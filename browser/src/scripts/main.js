@@ -25,6 +25,7 @@ require(['util', 'drawing', 'cd'], function(util, drawing, cd) {
         }
       });
       drawing.initScreen();
+      setInterval(function() { $('input#controller').focus(); }, 1000/cd.data.screen.frameRate);
     });
 
     // capture controller keys
